@@ -4345,9 +4345,25 @@ document
       event.preventDefault();
 
 
-      alert(
-        "Supabase authentication will be connected next."
-      );
+      const email = document.getElementById("authEmail").value.trim();
+const password = document.getElementById("authPassword").value;
+
+if (!email || !password) {
+  alert("Please enter email and password.");
+  return;
+}
+
+const { data, error } = await supabaseClient.auth.signUp({
+  email: email,
+  password: password
+});
+
+if (error) {
+  alert(error.message);
+  return;
+}
+
+alert("Account created successfully. Please check your email to verify your account.");
 
     }
   );
