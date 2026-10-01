@@ -5,7 +5,7 @@
 
 <meta
   name="viewport"
-  content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
 >
 
 <title>MindGames</title>
@@ -13,7 +13,7 @@
 <style>
 
 /* =========================================================
-   MINDGAMES — PREMIUM CLEAN UI
+   MINDGAMES — CLEAN PREMIUM GLASS UI
 ========================================================= */
 
 :root{
@@ -23,7 +23,8 @@
   --soft:#969da6;
 
   --glass:rgba(255,255,255,.34);
-  --glass2:rgba(255,255,255,.46);
+  --glass-strong:rgba(255,255,255,.46);
+
   --border:rgba(255,255,255,.74);
 
   --shadow:
@@ -32,24 +33,28 @@
 
   --dark:#20262d;
 
-  --gold:#d5a52d;
-  --silver:#8d969f;
-  --bronze:#b9794d;
+  --gold:#d4a52c;
+  --silver:#9199a2;
+  --bronze:#b8784d;
 }
 
 
 /* =========================================================
-   RESET
+   RESET + MOBILE TAP FIX
 ========================================================= */
 
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
+
+  -webkit-tap-highlight-color:transparent;
 }
 
 html{
   scroll-behavior:smooth;
+
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
@@ -70,6 +75,28 @@ body{
   overflow-x:hidden;
 
   -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
+
+button,
+a,
+input{
+  -webkit-tap-highlight-color:transparent;
+}
+
+button{
+  font-family:inherit;
+
+  outline:none;
+}
+
+button:focus,
+button:focus-visible{
+  outline:none;
+}
+
+button::-moz-focus-inner{
+  border:0;
 }
 
 
@@ -86,6 +113,8 @@ body{
   overflow:hidden;
 
   background:#eef1f5;
+
+  pointer-events:none;
 }
 
 .background::after{
@@ -281,7 +310,9 @@ body{
 
 .brand-name{
   font-size:23px;
+
   font-weight:760;
+
   letter-spacing:-1px;
 }
 
@@ -292,11 +323,6 @@ body{
 
   font-size:10px;
 }
-
-
-/* =========================================================
-   DESKTOP NAV
-========================================================= */
 
 .nav-label{
   padding:
@@ -315,7 +341,9 @@ body{
 
 .nav{
   display:flex;
+
   flex-direction:column;
+
   gap:4px;
 }
 
@@ -334,10 +362,13 @@ body{
   border-radius:13px;
 
   display:flex;
+
   align-items:center;
+
   gap:10px;
 
   font-size:12px;
+
   font-weight:600;
 
   text-align:left;
@@ -345,6 +376,8 @@ body{
   cursor:pointer;
 
   transition:.2s ease;
+
+  touch-action:manipulation;
 }
 
 .nav-item:hover{
@@ -352,6 +385,10 @@ body{
 
   background:
     rgba(255,255,255,.28);
+}
+
+.nav-item:active{
+  transform:scale(.98);
 }
 
 .nav-item.active{
@@ -377,6 +414,7 @@ body{
 
 .nav-item.active .nav-dot{
   background:#4d5660;
+
   opacity:1;
 }
 
@@ -396,12 +434,14 @@ body{
 
 
 /* =========================================================
-   TOPBAR
+   TOP BAR
 ========================================================= */
 
 .topbar{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
 
   margin-bottom:27px;
@@ -425,7 +465,9 @@ body{
 
 .user-area{
   display:flex;
+
   align-items:center;
+
   gap:10px;
 }
 
@@ -454,11 +496,14 @@ body{
   color:#5a626c;
 
   display:grid;
+
   place-items:center;
 
   cursor:pointer;
 
   transition:.2s ease;
+
+  touch-action:manipulation;
 }
 
 .profile-button:hover{
@@ -466,6 +511,10 @@ body{
     rgba(255,255,255,.55);
 
   transform:translateY(-1px);
+}
+
+.profile-button:active{
+  transform:scale(.96);
 }
 
 .profile-button svg{
@@ -510,11 +559,18 @@ body{
 ========================================================= */
 
 .hero{
-  min-height:300px;
 
-  padding:38px;
+  /*
+    Reduced height.
+    No unnecessary large empty space.
+  */
 
-  border-radius:28px;
+  min-height:225px;
+
+  padding:
+    28px 34px;
+
+  border-radius:26px;
 
   position:relative;
 
@@ -546,8 +602,8 @@ body{
 
   position:absolute;
 
-  width:330px;
-  height:330px;
+  width:310px;
+  height:310px;
 
   right:-160px;
   top:-190px;
@@ -555,13 +611,14 @@ body{
   border-radius:50%;
 
   background:
-    rgba(255,255,255,.24);
+    rgba(255,255,255,.23);
 
   filter:blur(35px);
 }
 
 .hero-content{
   position:relative;
+
   z-index:2;
 }
 
@@ -580,18 +637,18 @@ body{
 .hero h1{
   max-width:700px;
 
-  margin-top:14px;
+  margin-top:11px;
 
   font-size:
     clamp(
-      35px,
-      4.5vw,
-      52px
+      34px,
+      4.3vw,
+      50px
     );
 
   line-height:1.01;
 
-  letter-spacing:-2.2px;
+  letter-spacing:-2px;
 
   font-weight:780;
 }
@@ -599,45 +656,48 @@ body{
 .hero p{
   max-width:500px;
 
-  margin-top:14px;
+  margin-top:10px;
 
   color:#707883;
 
-  font-size:12px;
+  font-size:11px;
 
-  line-height:1.7;
+  line-height:1.6;
 }
 
 .start-button{
   display:inline-flex;
 
   align-items:center;
+
   gap:9px;
 
-  margin-top:23px;
+  margin-top:17px;
 
   padding:
-    12px 18px;
+    11px 17px;
 
   border:0;
 
-  border-radius:12px;
+  border-radius:11px;
 
   background:
     rgba(27,33,40,.94);
 
   color:#fff;
 
-  font-size:11px;
+  font-size:10px;
 
   font-weight:700;
 
   cursor:pointer;
 
   box-shadow:
-    0 12px 28px rgba(25,30,38,.14);
+    0 10px 24px rgba(25,30,38,.13);
 
   transition:.2s ease;
+
+  touch-action:manipulation;
 }
 
 .start-button:hover{
@@ -646,11 +706,16 @@ body{
   background:#11161c;
 }
 
+.start-button:active{
+  transform:scale(.97);
+}
+
 .start-button svg{
   width:14px;
   height:14px;
 
   fill:none;
+
   stroke:currentColor;
 
   stroke-width:1.8;
@@ -662,19 +727,21 @@ body{
 
 
 /* =========================================================
-   HOME PROGRESS
+   SECTION
 ========================================================= */
 
 .section{
-  margin-top:28px;
+  margin-top:25px;
 }
 
 .section-head{
   display:flex;
+
   align-items:flex-end;
+
   justify-content:space-between;
 
-  margin-bottom:13px;
+  margin-bottom:12px;
 }
 
 .section-title{
@@ -693,21 +760,26 @@ body{
   font-size:10px;
 }
 
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
 .progress-grid{
   display:grid;
 
   grid-template-columns:
     repeat(4,1fr);
 
-  gap:12px;
+  gap:11px;
 }
 
 .progress-card{
-  min-height:108px;
+  min-height:102px;
 
-  padding:17px;
+  padding:16px;
 
-  border-radius:19px;
+  border-radius:18px;
 
   background:
     rgba(255,255,255,.32);
@@ -742,9 +814,9 @@ body{
 }
 
 .progress-value{
-  margin-top:10px;
+  margin-top:9px;
 
-  font-size:23px;
+  font-size:22px;
 
   font-weight:760;
 
@@ -753,7 +825,7 @@ body{
 
 
 /* =========================================================
-   HOME RANK CARD
+   HOME RANK
 ========================================================= */
 
 .home-rank{
@@ -762,13 +834,13 @@ body{
   grid-template-columns:
     1.2fr .8fr;
 
-  gap:12px;
+  gap:11px;
 }
 
 .glass-card{
-  padding:20px;
+  padding:19px;
 
-  border-radius:20px;
+  border-radius:19px;
 
   background:
     rgba(255,255,255,.31);
@@ -787,15 +859,19 @@ body{
 
 .rank-mini{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
 
-  padding-top:10px;
+  padding-top:9px;
 }
 
 .rank-mini-left{
   display:flex;
+
   align-items:center;
+
   gap:10px;
 }
 
@@ -806,6 +882,7 @@ body{
   border-radius:50%;
 
   display:grid;
+
   place-items:center;
 
   background:
@@ -823,6 +900,7 @@ body{
 
 .rank-mini-name{
   font-size:11px;
+
   font-weight:680;
 }
 
@@ -840,9 +918,37 @@ body{
   font-size:10px;
 }
 
+.rank-view-button{
+  margin-top:16px;
+
+  border:0;
+
+  background:
+    rgba(29,35,42,.90);
+
+  color:white;
+
+  padding:
+    9px 13px;
+
+  border-radius:10px;
+
+  font-size:9px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  touch-action:manipulation;
+}
+
+.rank-view-button:active{
+  transform:scale(.97);
+}
+
 
 /* =========================================================
-   GAMES PAGE
+   GAMES
 ========================================================= */
 
 .game-grid{
@@ -853,11 +959,6 @@ body{
 
   gap:13px;
 }
-
-
-/* =========================================================
-   GAME CARD
-========================================================= */
 
 .game-card{
   min-height:225px;
@@ -892,6 +993,8 @@ body{
     transform .22s ease,
     background .22s ease,
     box-shadow .22s ease;
+
+  touch-action:manipulation;
 }
 
 .game-card:hover{
@@ -905,9 +1008,13 @@ body{
     inset 0 1px 0 rgba(255,255,255,.82);
 }
 
+.game-card:active{
+  transform:scale(.985);
+}
+
 
 /* =========================================================
-   GAME VISUAL
+   GAME VISUALS
 ========================================================= */
 
 .game-visual{
@@ -917,7 +1024,9 @@ body{
   border-radius:19px;
 
   display:flex;
+
   align-items:center;
+
   justify-content:center;
 
   background:
@@ -933,7 +1042,7 @@ body{
 }
 
 
-/* memory */
+/* MEMORY */
 
 .memory .game-visual{
   gap:5px;
@@ -960,15 +1069,19 @@ body{
 }
 
 .memory-card:nth-child(2){
-  transform:translateY(7px) rotate(7deg);
+  transform:
+    translateY(7px)
+    rotate(7deg);
 }
 
 .memory-card:nth-child(3){
-  transform:translateY(-5px) rotate(-5deg);
+  transform:
+    translateY(-5px)
+    rotate(-5deg);
 }
 
 
-/* number */
+/* NUMBER */
 
 .number .game-visual{
   display:grid;
@@ -984,6 +1097,7 @@ body{
 
 .number-tile{
   display:grid;
+
   place-items:center;
 
   border-radius:6px;
@@ -1002,7 +1116,7 @@ body{
 }
 
 
-/* sequence */
+/* SEQUENCE */
 
 .sequence .game-visual{
   gap:7px;
@@ -1046,7 +1160,7 @@ body{
 }
 
 
-/* focus */
+/* FOCUS */
 
 .focus .game-visual{
   flex-direction:column;
@@ -1064,6 +1178,7 @@ body{
     2px solid rgba(132,105,175,.35);
 
   display:grid;
+
   place-items:center;
 }
 
@@ -1091,7 +1206,7 @@ body{
 }
 
 
-/* shape */
+/* SHAPE */
 
 .shape .game-visual{
   gap:6px;
@@ -1126,7 +1241,7 @@ body{
 }
 
 
-/* code */
+/* CODE */
 
 .code .game-visual{
   flex-direction:column;
@@ -1243,46 +1358,31 @@ body{
    RANK PAGE
 ========================================================= */
 
-.rank-hero{
-  padding:23px;
+.rank-list{
+  padding:
+    7px 19px;
 
-  border-radius:22px;
+  border-radius:21px;
 
   background:
-    rgba(255,255,255,.34);
+    rgba(255,255,255,.30);
 
   border:
-    1px solid rgba(255,255,255,.70);
+    1px solid rgba(255,255,255,.68);
 
-  backdrop-filter:blur(28px);
+  backdrop-filter:
+    blur(27px);
 
-  -webkit-backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:
+    blur(27px);
 
   box-shadow:var(--shadow);
-
-  margin-bottom:14px;
-}
-
-.rank-hero-title{
-  font-size:19px;
-
-  font-weight:750;
-
-  letter-spacing:-.5px;
-}
-
-.rank-hero-text{
-  margin-top:5px;
-
-  color:#7b838d;
-
-  font-size:10px;
-
-  line-height:1.6;
 }
 
 
-/* podium */
+/* =========================================================
+   PODIUM
+========================================================= */
 
 .podium{
   display:grid;
@@ -1301,7 +1401,7 @@ body{
   position:relative;
 
   padding:
-    18px 12px;
+    17px 12px;
 
   text-align:center;
 
@@ -1313,74 +1413,90 @@ body{
   border:
     1px solid rgba(255,255,255,.70);
 
-  backdrop-filter:blur(26px);
+  backdrop-filter:
+    blur(26px);
 
-  -webkit-backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:
+    blur(26px);
 
   box-shadow:var(--shadow);
+
+  overflow:hidden;
+}
+
+.podium-card::after{
+  content:"";
+
+  position:absolute;
+
+  left:15%;
+  right:15%;
+  bottom:0;
+
+  height:2px;
+
+  border-radius:10px;
 }
 
 .podium-card.first{
-  padding-top:25px;
-  padding-bottom:25px;
+  padding-top:23px;
+  padding-bottom:23px;
 }
 
-.podium-medal{
-  width:43px;
-  height:43px;
-
-  margin:0 auto 9px;
-
-  border-radius:50%;
-
-  display:grid;
-  place-items:center;
-
-  font-size:13px;
-
-  font-weight:800;
-}
-
-.first .podium-medal{
-  color:#86630c;
-
+.podium-card.first::after{
   background:
     linear-gradient(
-      145deg,
-      #f4d77c,
-      #d3a22e
+      90deg,
+      transparent,
+      #d4a52c,
+      transparent
     );
-
-  box-shadow:
-    0 8px 20px rgba(198,153,42,.20);
 }
 
-.second .podium-medal{
-  color:#59636c;
-
+.podium-card.second::after{
   background:
     linear-gradient(
-      145deg,
-      #e0e4e8,
-      #aab2b9
+      90deg,
+      transparent,
+      #9da5ad,
+      transparent
     );
-
-  box-shadow:
-    0 8px 20px rgba(120,130,140,.17);
 }
 
-.third .podium-medal{
-  color:#774a2c;
-
+.podium-card.third::after{
   background:
     linear-gradient(
-      145deg,
-      #dfad85,
-      #b9794d
+      90deg,
+      transparent,
+      #b8784d,
+      transparent
     );
+}
 
-  box-shadow:
-    0 8px 20px rgba(170,105,65,.18);
+
+/* =========================================================
+   REAL MEDAL ICONS
+========================================================= */
+
+.medal-icon{
+  width:50px;
+  height:50px;
+
+  margin:
+    0 auto 8px;
+
+  display:block;
+
+  filter:
+    drop-shadow(
+      0 7px 9px
+      rgba(40,45,50,.12)
+    );
+}
+
+.first .medal-icon{
+  width:56px;
+  height:56px;
 }
 
 .podium-place{
@@ -1412,26 +1528,9 @@ body{
 }
 
 
-/* full list */
-
-.rank-list{
-  padding:
-    7px 19px;
-
-  border-radius:21px;
-
-  background:
-    rgba(255,255,255,.30);
-
-  border:
-    1px solid rgba(255,255,255,.68);
-
-  backdrop-filter:blur(27px);
-
-  -webkit-backdrop-filter:blur(27px);
-
-  box-shadow:var(--shadow);
-}
+/* =========================================================
+   RANK LIST
+========================================================= */
 
 .rank-row{
   display:grid;
@@ -1471,19 +1570,6 @@ body{
   color:#858c95;
 
   font-size:9px;
-}
-
-.rank-row.current{
-  margin:
-    0 -9px;
-
-  padding:
-    0 9px;
-
-  border-radius:12px;
-
-  background:
-    rgba(255,255,255,.34);
 }
 
 
@@ -1540,6 +1626,7 @@ body{
   height:61px;
 
   display:grid;
+
   place-items:center;
 
   border-radius:50%;
@@ -1596,12 +1683,18 @@ body{
   cursor:pointer;
 
   transition:.2s ease;
+
+  touch-action:manipulation;
 }
 
 .login-button:hover{
   transform:translateY(-1px);
 
   background:#11161c;
+}
+
+.login-button:active{
+  transform:scale(.97);
 }
 
 .profile-stats{
@@ -1696,6 +1789,7 @@ body{
   display:none;
 
   align-items:center;
+
   justify-content:center;
 
   padding:18px;
@@ -1771,6 +1865,14 @@ body{
   color:#68707a;
 
   cursor:pointer;
+
+  font-size:17px;
+
+  touch-action:manipulation;
+}
+
+.close-modal:active{
+  transform:scale(.94);
 }
 
 .auth-tabs{
@@ -1806,6 +1908,8 @@ body{
   font-weight:700;
 
   cursor:pointer;
+
+  touch-action:manipulation;
 }
 
 .auth-tab.active{
@@ -1824,6 +1928,7 @@ body{
 
 .input{
   width:100%;
+
   height:42px;
 
   padding:
@@ -1844,6 +1949,8 @@ body{
   color:#20262c;
 
   font-size:11px;
+
+  -webkit-tap-highlight-color:transparent;
 }
 
 .input:focus{
@@ -1852,10 +1959,13 @@ body{
 
   background:
     rgba(255,255,255,.65);
+
+  outline:none;
 }
 
 .auth-submit{
   width:100%;
+
   height:42px;
 
   border:0;
@@ -1872,10 +1982,22 @@ body{
   font-weight:700;
 
   cursor:pointer;
+
+  touch-action:manipulation;
 }
+
+.auth-submit:active{
+  transform:scale(.98);
+}
+
+
+/* =========================================================
+   GOOGLE BUTTON
+========================================================= */
 
 .google-button{
   width:100%;
+
   height:42px;
 
   margin-top:8px;
@@ -1886,7 +2008,7 @@ body{
     1px solid rgba(80,90,100,.13);
 
   background:
-    rgba(255,255,255,.42);
+    rgba(255,255,255,.48);
 
   color:#353b42;
 
@@ -1895,6 +2017,34 @@ body{
   font-weight:650;
 
   cursor:pointer;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:9px;
+
+  touch-action:manipulation;
+
+  transition:.2s ease;
+}
+
+.google-button:hover{
+  background:
+    rgba(255,255,255,.68);
+}
+
+.google-button:active{
+  transform:scale(.98);
+}
+
+.google-icon{
+  width:17px;
+  height:17px;
+
+  flex:none;
 }
 
 
@@ -1957,6 +2107,7 @@ body{
   display:flex;
 
   align-items:center;
+
   justify-content:center;
 
   font-size:9px;
@@ -1966,6 +2117,16 @@ body{
   cursor:pointer;
 
   transition:.2s ease;
+
+  touch-action:manipulation;
+}
+
+.mobile-nav button:hover{
+  color:#30373e;
+}
+
+.mobile-nav button:active{
+  transform:scale(.96);
 }
 
 .mobile-nav button.active{
@@ -1995,13 +2156,13 @@ body{
     margin-left:0;
 
     padding:
-      14px
       13px
-      94px;
+      12px
+      92px;
   }
 
   .topbar{
-    margin-bottom:18px;
+    margin-bottom:15px;
   }
 
   .page-title{
@@ -2022,67 +2183,108 @@ body{
   }
 
 
-  /* home */
+  /* -----------------------------------------
+     SHORTER MOBILE HERO
+  ----------------------------------------- */
 
   .hero{
-    min-height:260px;
+    min-height:200px;
 
     padding:
-      24px 19px;
+      21px 18px;
 
-    border-radius:22px;
+    border-radius:21px;
+  }
+
+  .hero-small{
+    font-size:9px;
   }
 
   .hero h1{
+    margin-top:9px;
+
     font-size:
       clamp(
-        29px,
+        28px,
         8vw,
-        35px
+        34px
       );
 
     letter-spacing:-1.3px;
   }
 
   .hero p{
-    font-size:10px;
+    margin-top:8px;
 
-    max-width:100%;
+    font-size:9.5px;
+
+    line-height:1.5;
+  }
+
+  .start-button{
+    margin-top:14px;
+
+    padding:
+      10px 15px;
+
+    font-size:9.5px;
   }
 
 
-  /* progress */
+  /* -----------------------------------------
+     PROGRESS
+  ----------------------------------------- */
+
+  .section{
+    margin-top:20px;
+  }
 
   .progress-grid{
     grid-template-columns:
       repeat(2,1fr);
 
-    gap:9px;
+    gap:8px;
   }
 
   .progress-card{
-    min-height:98px;
+    min-height:88px;
 
-    padding:14px;
+    padding:13px;
 
-    border-radius:17px;
+    border-radius:16px;
+  }
+
+  .progress-label{
+    font-size:9px;
   }
 
   .progress-value{
-    font-size:19px;
+    margin-top:7px;
+
+    font-size:18px;
   }
 
 
-  /* home rank */
+  /* -----------------------------------------
+     HOME RANK
+  ----------------------------------------- */
 
   .home-rank{
     grid-template-columns:1fr;
 
-    gap:10px;
+    gap:8px;
+  }
+
+  .glass-card{
+    padding:16px;
+
+    border-radius:17px;
   }
 
 
-  /* games */
+  /* -----------------------------------------
+     GAMES
+  ----------------------------------------- */
 
   .game-grid{
     grid-template-columns:1fr;
@@ -2091,17 +2293,15 @@ body{
   }
 
   .game-card{
-    min-height:210px;
+    min-height:205px;
 
     border-radius:19px;
   }
 
 
-  /* rank */
-
-  .rank-hero{
-    padding:19px;
-  }
+  /* -----------------------------------------
+     RANK
+  ----------------------------------------- */
 
   .podium{
     grid-template-columns:
@@ -2112,17 +2312,22 @@ body{
 
   .podium-card{
     padding:
-      15px 7px;
+      14px 7px;
   }
 
   .podium-card.first{
-    padding-top:21px;
-    padding-bottom:21px;
+    padding-top:20px;
+    padding-bottom:20px;
   }
 
-  .podium-medal{
-    width:38px;
-    height:38px;
+  .medal-icon{
+    width:43px;
+    height:43px;
+  }
+
+  .first .medal-icon{
+    width:49px;
+    height:49px;
   }
 
   .podium-name{
@@ -2135,13 +2340,15 @@ body{
   }
 
 
-  /* profile */
+  /* -----------------------------------------
+     PROFILE
+  ----------------------------------------- */
 
   .profile-card{
     padding:
-      22px 17px;
+      21px 17px;
 
-    border-radius:21px;
+    border-radius:20px;
   }
 
   .profile-head{
@@ -2157,10 +2364,18 @@ body{
   .profile-stats{
     grid-template-columns:
       repeat(2,1fr);
+
+    margin-top:20px;
+  }
+
+  .profile-section{
+    padding:17px;
   }
 
 
-  /* mobile nav */
+  /* -----------------------------------------
+     MOBILE NAV
+  ----------------------------------------- */
 
   .mobile-nav{
     display:flex;
@@ -2175,17 +2390,23 @@ body{
 @media(max-width:380px){
 
   .main{
-    padding-left:10px;
-    padding-right:10px;
+    padding-left:9px;
+    padding-right:9px;
   }
 
   .hero{
+    min-height:190px;
+
     padding:
-      21px 16px;
+      19px 15px;
   }
 
   .hero h1{
-    font-size:27px;
+    font-size:26px;
+  }
+
+  .hero p{
+    font-size:9px;
   }
 
   .game-visual{
@@ -2194,7 +2415,7 @@ body{
   }
 
   .game-card{
-    min-height:205px;
+    min-height:200px;
   }
 
   .mobile-nav{
@@ -2236,7 +2457,7 @@ body{
 
 
 /* =========================================================
-   LARGE
+   LARGE SCREEN
 ========================================================= */
 
 @media(min-width:1400px){
@@ -2281,7 +2502,7 @@ body{
 
 
 <!-- =======================================================
-     FLOWING BACKGROUND
+     BACKGROUND
 ======================================================= -->
 
 <div class="background">
@@ -2298,7 +2519,7 @@ body{
 
 
 <!-- =======================================================
-     SIDEBAR
+     DESKTOP SIDEBAR
 ======================================================= -->
 
 <aside class="sidebar">
@@ -2380,7 +2601,7 @@ body{
 
 
 <!-- =======================================================
-     TOP BAR
+     TOPBAR
 ======================================================= -->
 
 <header class="topbar">
@@ -2463,8 +2684,6 @@ body{
   class="view active"
   id="homeView">
 
-
-  <!-- HERO -->
 
   <section class="hero">
 
@@ -2653,18 +2872,8 @@ body{
 
 
         <button
-          id="viewRank"
-          style="
-            margin-top:18px;
-            border:0;
-            background:rgba(29,35,42,.90);
-            color:white;
-            padding:10px 14px;
-            border-radius:10px;
-            font-size:10px;
-            font-weight:700;
-            cursor:pointer;
-          ">
+          class="rank-view-button"
+          id="viewRank">
 
           View Rank
 
@@ -2699,7 +2908,6 @@ body{
     <article
       class="game-card memory"
       data-game="Memory">
-
 
       <div class="game-visual">
 
@@ -2739,7 +2947,6 @@ body{
     <article
       class="game-card number"
       data-game="Number Logic">
-
 
       <div class="game-visual">
 
@@ -2781,7 +2988,6 @@ body{
       class="game-card sequence"
       data-game="Sequences">
 
-
       <div class="game-visual">
 
         <span class="sequence-node"></span>
@@ -2821,10 +3027,10 @@ body{
       class="game-card focus"
       data-game="Focus">
 
-
       <div class="game-visual">
 
         <div class="target-ring"></div>
+
         <div class="target-dot"></div>
 
       </div>
@@ -2854,12 +3060,11 @@ body{
 
 
 
-    <!-- SHAPE LOGIC -->
+    <!-- SHAPE -->
 
     <article
       class="game-card shape"
       data-game="Shape Logic">
-
 
       <div class="game-visual">
 
@@ -2893,12 +3098,11 @@ body{
 
 
 
-    <!-- CODE BREAKER -->
+    <!-- CODE -->
 
     <article
       class="game-card code"
       data-game="Code Breaker">
-
 
       <div class="game-visual">
 
@@ -2949,33 +3153,107 @@ body{
   id="rankView">
 
 
-  <div class="rank-hero">
-
-    <div class="rank-hero-title">
-      Climb the leaderboard.
-    </div>
-
-    <div class="rank-hero-text">
-      Your score determines your position.
-      Play more games and improve your personal best.
-    </div>
-
-  </div>
-
-
-
-  <!-- PODIUM -->
+  <!-- TOP 3 -->
 
   <div class="podium">
 
 
-    <!-- SECOND -->
+    <!-- SECOND / SILVER -->
 
     <div class="podium-card second">
 
-      <div class="podium-medal">
-        2
-      </div>
+
+      <svg
+        class="medal-icon"
+        viewBox="0 0 64 64"
+        aria-label="Silver medal">
+
+        <defs>
+
+          <linearGradient
+            id="silverRibbon"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#aeb6be"/>
+
+            <stop
+              offset="100%"
+              stop-color="#7f8992"/>
+
+          </linearGradient>
+
+
+          <linearGradient
+            id="silverMedal"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#f0f2f4"/>
+
+            <stop
+              offset="48%"
+              stop-color="#bfc6cc"/>
+
+            <stop
+              offset="100%"
+              stop-color="#858e97"/>
+
+          </linearGradient>
+
+        </defs>
+
+
+        <path
+          d="M20 4h10l6 20H25z"
+          fill="url(#silverRibbon)"
+        />
+
+        <path
+          d="M44 4H34l-6 20h11z"
+          fill="#747f88"
+          opacity=".9"
+        />
+
+        <circle
+          cx="32"
+          cy="39"
+          r="17"
+          fill="url(#silverMedal)"
+        />
+
+        <circle
+          cx="32"
+          cy="39"
+          r="13"
+          fill="none"
+          stroke="#ffffff"
+          stroke-opacity=".45"
+          stroke-width="1.5"
+        />
+
+        <text
+          x="32"
+          y="44"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="800"
+          fill="#5d6871">
+
+          2
+
+        </text>
+
+      </svg>
+
 
       <div class="podium-place">
         Silver
@@ -2993,13 +3271,121 @@ body{
 
 
 
-    <!-- FIRST -->
+    <!-- FIRST / GOLD -->
 
     <div class="podium-card first">
 
-      <div class="podium-medal">
-        1
-      </div>
+
+      <svg
+        class="medal-icon"
+        viewBox="0 0 64 64"
+        aria-label="Gold medal">
+
+        <defs>
+
+          <linearGradient
+            id="goldRibbon"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#f0c95c"/>
+
+            <stop
+              offset="100%"
+              stop-color="#c89419"/>
+
+          </linearGradient>
+
+
+          <linearGradient
+            id="goldMedal"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#ffe99a"/>
+
+            <stop
+              offset="45%"
+              stop-color="#e7bb43"/>
+
+            <stop
+              offset="100%"
+              stop-color="#b77e10"/>
+
+          </linearGradient>
+
+        </defs>
+
+
+        <path
+          d="M19 3h11l6 21H24z"
+          fill="url(#goldRibbon)"
+        />
+
+        <path
+          d="M45 3H34l-6 21h11z"
+          fill="#b88316"
+        />
+
+
+        <circle
+          cx="32"
+          cy="39"
+          r="18"
+          fill="url(#goldMedal)"
+        />
+
+
+        <circle
+          cx="32"
+          cy="39"
+          r="14"
+          fill="none"
+          stroke="#fff4c2"
+          stroke-opacity=".65"
+          stroke-width="1.6"
+        />
+
+
+        <path
+          d="
+            M32 28
+            l3 7
+            8 .7
+            -6 5.2
+            2 8
+            -7-4
+            -7 4
+            2-8
+            -6-5.2
+            8-.7z
+          "
+          fill="#fff0a6"
+          opacity=".65"
+        />
+
+        <text
+          x="32"
+          y="44"
+          text-anchor="middle"
+          font-size="12"
+          font-weight="900"
+          fill="#89600a">
+
+          1
+
+        </text>
+
+      </svg>
+
 
       <div class="podium-place">
         Gold
@@ -3017,13 +3403,104 @@ body{
 
 
 
-    <!-- THIRD -->
+    <!-- THIRD / BRONZE -->
 
     <div class="podium-card third">
 
-      <div class="podium-medal">
-        3
-      </div>
+
+      <svg
+        class="medal-icon"
+        viewBox="0 0 64 64"
+        aria-label="Bronze medal">
+
+        <defs>
+
+          <linearGradient
+            id="bronzeRibbon"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#d59a6c"/>
+
+            <stop
+              offset="100%"
+              stop-color="#9a5d38"/>
+
+          </linearGradient>
+
+
+          <linearGradient
+            id="bronzeMedal"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1">
+
+            <stop
+              offset="0%"
+              stop-color="#e3ad85"/>
+
+            <stop
+              offset="48%"
+              stop-color="#bd7c51"/>
+
+            <stop
+              offset="100%"
+              stop-color="#8d512f"/>
+
+          </linearGradient>
+
+        </defs>
+
+
+        <path
+          d="M20 4h10l6 20H25z"
+          fill="url(#bronzeRibbon)"
+        />
+
+        <path
+          d="M44 4H34l-6 20h11z"
+          fill="#985b37"
+        />
+
+
+        <circle
+          cx="32"
+          cy="39"
+          r="17"
+          fill="url(#bronzeMedal)"
+        />
+
+
+        <circle
+          cx="32"
+          cy="39"
+          r="13"
+          fill="none"
+          stroke="#f2c5a5"
+          stroke-opacity=".48"
+          stroke-width="1.5"
+        />
+
+
+        <text
+          x="32"
+          y="44"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="800"
+          fill="#704025">
+
+          3
+
+        </text>
+
+      </svg>
+
 
       <div class="podium-place">
         Bronze
@@ -3044,7 +3521,7 @@ body{
 
 
 
-  <!-- 1–100 -->
+  <!-- RANK 1–100 -->
 
   <div
     class="rank-list"
@@ -3344,10 +3821,68 @@ body{
       </button>
 
 
+      <!-- GOOGLE -->
+
       <button
         class="google-button"
         type="button"
         id="googleButton">
+
+
+        <svg
+          class="google-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true">
+
+          <path
+            fill="#4285F4"
+            d="
+              M21.35 12.23
+              c0-.7-.06-1.38-.18-2.03
+              H12v3.84h5.24
+              a4.48 4.48 0 0 1-1.94 2.94
+              v2.45h3.14
+              c1.84-1.69 2.91-4.18 2.91-7.2z
+            "/>
+
+          <path
+            fill="#34A853"
+            d="
+              M12 21.72
+              c2.63 0 4.84-.87 6.45-2.36
+              l-3.14-2.45
+              c-.87.58-1.98.92-3.31.92
+              -2.54 0-4.69-1.72-5.46-4.03
+              H3.3v2.53
+              A9.74 9.74 0 0 0 12 21.72z
+            "/>
+
+          <path
+            fill="#FBBC05"
+            d="
+              M6.54 13.8
+              A5.85 5.85 0 0 1 6.23 12
+              c0-.62.11-1.23.31-1.8
+              V7.67H3.3
+              A9.75 9.75 0 0 0 2.27 12
+              c0 1.57.38 3.06 1.03 4.33
+              l3.24-2.53z
+            "/>
+
+          <path
+            fill="#EA4335"
+            d="
+              M12 6.17
+              c1.43 0 2.72.49 3.73 1.46
+              l2.8-2.8
+              C16.84 3.26 14.63 2.28 12 2.28
+              a9.74 9.74 0 0 0-8.7 5.39
+              l3.24 2.53
+              C7.31 7.89 9.46 6.17 12 6.17z
+            "/>
+
+        </svg>
+
 
         Continue with Google
 
@@ -3364,11 +3899,6 @@ body{
 
 
 <script>
-
-/* =========================================================
-   MINDGAMES APP
-========================================================= */
-
 
 /* =========================================================
    PAGE DATA
@@ -3404,7 +3934,7 @@ const pageData = {
 
 
 /* =========================================================
-   ELEMENTS
+   VIEWS
 ========================================================= */
 
 const views = {
@@ -3501,7 +4031,7 @@ function openPage(page){
 
 
 /* =========================================================
-   NAV EVENTS
+   NAVIGATION EVENTS
 ========================================================= */
 
 navButtons.forEach(
@@ -3601,7 +4131,7 @@ document
 
 
 /* =========================================================
-   GAME CLICK
+   GAME CARDS
 ========================================================= */
 
 document
@@ -3666,12 +4196,6 @@ function createRankList(){
       "rank-row";
 
 
-    /*
-      Current guest position is not invented.
-      Therefore no fake rank is highlighted.
-    */
-
-
     row.innerHTML = `
 
       <div class="rank-position">
@@ -3689,7 +4213,9 @@ function createRankList(){
     `;
 
 
-    rankList.appendChild(row);
+    rankList.appendChild(
+      row
+    );
 
   }
 
@@ -3902,7 +4428,7 @@ window.addEventListener(
 
 
 /* =========================================================
-   BROWSER HISTORY
+   HISTORY
 ========================================================= */
 
 window.addEventListener(
