@@ -3898,74 +3898,89 @@ button::-moz-focus-inner{
 
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* =========================================================
+   MINDGAMES — FUNCTIONAL VERSION
+   ONLY CHANGE ONE THING:
+   SUPABASE_PUBLISHABLE_KEY
+========================================================= */
+
+const SUPABASE_URL = "https://ykkfxytxdymmbcykoikw.supabase.co";
+
+/* PASTE YOUR SUPABASE PUBLISHABLE KEY HERE.
+   It starts with: sb_publishable_...
+   Do NOT paste a service_role key or Google Client Secret. */
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
 
 /* =========================================================
    PAGE DATA
 ========================================================= */
 
 const pageData = {
-
   home:{
     title:"Home",
-    subtitle:
-      "Train your mind, one challenge at a time."
+    subtitle:"Train your mind, one challenge at a time."
   },
-
   games:{
     title:"Games",
-    subtitle:
-      "Choose a challenge and start playing."
+    subtitle:"Choose a challenge and start playing."
   },
-
   rank:{
     title:"Rank",
-    subtitle:
-      "Build your score and move higher."
+    subtitle:"Build your score and move higher."
   },
-
   profile:{
     title:"Profile",
-    subtitle:
-      "Your progress and achievements."
+    subtitle:"Your progress and achievements."
   }
-
 };
+
+const views = {
+  home:document.getElementById("homeView"),
+  games:document.getElementById("gamesView"),
+  rank:document.getElementById("rankView"),
+  profile:document.getElementById("profileView")
+};
+
+const pageTitle = document.getElementById("pageTitle");
+const pageSubtitle = document.getElementById("pageSubtitle");
+const navButtons = document.querySelectorAll("[data-page]");
 
 
 /* =========================================================
-   VIEWS
+   SMALL HELPERS
 ========================================================= */
 
-const views = {
+function showMessage(message){
+  window.alert(message);
+}
 
-  home:
-    document.getElementById("homeView"),
+function setText(selector, value){
+  const el = document.querySelector(selector);
+  if(el) el.textContent = value;
+}
 
-  games:
-    document.getElementById("gamesView"),
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[char]));
+}
 
-  rank:
-    document.getElementById("rankView"),
-
-  profile:
-    document.getElementById("profileView")
-
-};
-
-
-const pageTitle =
-  document.getElementById("pageTitle");
-
-
-const pageSubtitle =
-  document.getElementById("pageSubtitle");
-
-
-const navButtons =
-  document.querySelectorAll(
-    "[data-page]"
-  );
+function getInitial(name){
+  return (name || "G").trim().charAt(0).toUpperCase() || "G";
+}
 
 
 /* =========================================================
@@ -3973,196 +3988,512 @@ const navButtons =
 ========================================================= */
 
 function openPage(page){
+  if(!views[page]) return;
 
-  if(!views[page]){
-    return;
-  }
+  Object.values(views).forEach(view => {
+    view.classList.remove("active");
+  });
 
+  views[page].classList.add("active");
 
-  Object.values(views).forEach(
-    view => {
+  pageTitle.textContent = pageData[page].title;
+  pageSubtitle.textContent = pageData[page].subtitle;
 
-      view.classList.remove(
-        "active"
-      );
+  navButtons.forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === page
+    );
+  });
 
-    }
-  );
-
-
-  views[page].classList.add(
-    "active"
-  );
-
-
-  pageTitle.textContent =
-    pageData[page].title;
-
-
-  pageSubtitle.textContent =
-    pageData[page].subtitle;
-
-
-  navButtons.forEach(
-    button => {
-
-      button.classList.toggle(
-        "active",
-        button.dataset.page === page
-      );
-
-    }
-  );
-
-
-  history.replaceState(
-    null,
-    "",
-    "#" + page
-  );
-
+  history.replaceState(null,"","#"+page);
 
   window.scrollTo({
     top:0,
     behavior:"smooth"
   });
+}
 
+navButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    openPage(button.dataset.page);
+  });
+});
+
+function loadPage(){
+  const hash = window.location.hash.replace("#","");
+  openPage(views[hash] ? hash : "home");
 }
 
 
 /* =========================================================
-   NAVIGATION EVENTS
+   TOP PROFILE / HOME BUTTONS
 ========================================================= */
 
-navButtons.forEach(
-  button => {
+document.getElementById("topProfile").addEventListener(
+  "click",
+  () => openPage("profile")
+);
 
-    button.addEventListener(
-      "click",
-      () => {
+document.getElementById("startPlaying").addEventListener(
+  "click",
+  () => openPage("games")
+);
 
-        openPage(
-          button.dataset.page
-        );
+document.getElementById("viewRank").addEventListener(
+  "click",
+  () => openPage("rank")
+);
 
-      }
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+let currentUser = null;
+let currentProfile = {
+  id:null,
+  username:null,
+  avatar_url:null,
+  level:1,
+  xp:0,
+  points:0,
+  games_played:0,
+  best_score:0
+};
+
+let authMode = "login";
+
+
+/* =========================================================
+   AUTH UI REFERENCES
+========================================================= */
+
+const authModal = document.getElementById("authModal");
+const loginButton = document.getElementById("loginButton");
+const closeModal = document.getElementById("closeModal");
+const authForm = document.getElementById("authForm");
+const authTabs = document.querySelectorAll(".auth-tab");
+const authSubmit = document.querySelector(".auth-submit");
+const googleButton = document.getElementById("googleButton");
+
+const emailInput = authForm.querySelector('input[type="email"]');
+const passwordInput = authForm.querySelector('input[type="password"]');
+
+
+/* =========================================================
+   AUTH MODAL
+========================================================= */
+
+function openAuth(mode="login"){
+  authMode = mode;
+
+  authModal.classList.add("show");
+
+  authTabs.forEach(tab => {
+    tab.classList.toggle(
+      "active",
+      tab.dataset.auth === mode
     );
+  });
 
+  authSubmit.textContent =
+    mode === "login"
+      ? "Login"
+      : "Create Account";
+}
+
+function closeAuth(){
+  authModal.classList.remove("show");
+}
+
+loginButton.addEventListener(
+  "click",
+  () => {
+    if(currentUser){
+      openPage("profile");
+    }else{
+      openAuth("login");
+    }
+  }
+);
+
+closeModal.addEventListener(
+  "click",
+  closeAuth
+);
+
+authModal.addEventListener(
+  "click",
+  event => {
+    if(event.target === authModal){
+      closeAuth();
+    }
+  }
+);
+
+authTabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    openAuth(tab.dataset.auth);
+  });
+});
+
+
+/* =========================================================
+   PROFILE UI
+========================================================= */
+
+function updateProfileUI(){
+  const guest = !currentUser;
+
+  const name =
+    currentProfile.username ||
+    currentUser?.user_metadata?.full_name ||
+    currentUser?.user_metadata?.name ||
+    currentUser?.email?.split("@")[0] ||
+    "Guest";
+
+  const avatarUrl =
+    currentProfile.avatar_url ||
+    currentUser?.user_metadata?.avatar_url ||
+    currentUser?.user_metadata?.picture ||
+    "";
+
+  const profileCard = document.querySelector(".profile-card");
+  const profilePerson = profileCard?.querySelector(".profile-person");
+  const avatar = profileCard?.querySelector(".avatar");
+  const profileName = profileCard?.querySelector(".profile-name");
+  const profileStatus = profileCard?.querySelector(".profile-status");
+
+  if(avatar){
+    avatar.innerHTML = avatarUrl
+      ? `<img src="${escapeHtml(avatarUrl)}" alt="">`
+      : getInitial(name);
+  }
+
+  if(profileName){
+    profileName.textContent = name;
+  }
+
+  if(profileStatus){
+    profileStatus.textContent = guest
+      ? "Your progress is waiting to be saved"
+      : (currentUser.email || "Signed in");
+  }
+
+  if(loginButton){
+    loginButton.textContent =
+      guest ? "Login / Sign Up" : "Sign Out";
+  }
+
+  setText("#topUserName", guest ? "Guest" : name);
+
+  const stats = profileCard?.querySelectorAll(".profile-stat strong");
+  if(stats && stats.length >= 4){
+    stats[0].textContent = currentProfile.level ?? 1;
+    stats[1].textContent = currentProfile.xp ?? 0;
+    stats[2].textContent = currentProfile.points ?? 0;
+    stats[3].textContent = currentProfile.games_played ?? 0;
+  }
+
+  const rankCircle = document.querySelector(".rank-circle");
+  const rankName = document.querySelector(".rank-mini-name");
+  const rankStatus = document.querySelector(".rank-mini-status");
+
+  if(rankName){
+    rankName.textContent = name;
+  }
+
+  if(rankStatus){
+    rankStatus.textContent =
+      guest
+        ? "Not ranked yet"
+        : "Progress saved";
+  }
+
+  if(rankCircle){
+    rankCircle.textContent =
+      currentProfile.points > 0 ? currentProfile.points : "—";
+  }
+}
+
+
+/* =========================================================
+   PROFILE DATABASE
+========================================================= */
+
+async function loadProfile(){
+  if(!currentUser){
+    currentProfile = {
+      id:null,
+      username:null,
+      avatar_url:null,
+      level:1,
+      xp:0,
+      points:0,
+      games_played:0,
+      best_score:0
+    };
+    updateProfileUI();
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+  if(data){
+    currentProfile = data;
+  }else{
+    const metadata =
+      currentUser.user_metadata || {};
+
+    const newProfile = {
+      id:currentUser.id,
+      username:
+        metadata.full_name ||
+        metadata.name ||
+        currentUser.email?.split("@")[0] ||
+        "Player",
+      avatar_url:
+        metadata.avatar_url ||
+        metadata.picture ||
+        null,
+      level:1,
+      xp:0,
+      points:0,
+      games_played:0,
+      best_score:0
+    };
+
+    const result =
+      await supabaseClient
+        .from("profiles")
+        .upsert(
+          newProfile,
+          {onConflict:"id"}
+        )
+        .select()
+        .maybeSingle();
+
+    if(result.data){
+      currentProfile = result.data;
+    }else{
+      currentProfile = newProfile;
+      if(result.error){
+        console.warn(
+          "Profile save/read:",
+          result.error.message
+        );
+      }
+    }
+  }
+
+  updateProfileUI();
+}
+
+
+/* =========================================================
+   AUTH CHANGE
+========================================================= */
+
+async function handleSession(session){
+  currentUser = session?.user || null;
+  await loadProfile();
+  updateProfileUI();
+}
+
+supabaseClient.auth.onAuthStateChange(
+  (_event, session) => {
+    setTimeout(() => {
+      handleSession(session);
+    },0);
   }
 );
 
 
 /* =========================================================
-   INITIAL PAGE
+   EMAIL LOGIN / SIGN UP
 ========================================================= */
 
-function loadPage(){
+authForm.addEventListener(
+  "submit",
+  async event => {
 
-  const hash =
-    window.location.hash
-      .replace("#","");
+    event.preventDefault();
+
+    const email =
+      emailInput.value.trim();
+
+    const password =
+      passwordInput.value;
+
+    if(!email || !password){
+      showMessage(
+        "Please enter your email and password."
+      );
+      return;
+    }
+
+    authSubmit.disabled = true;
+
+    try{
+
+      if(authMode === "login"){
+
+        const { error } =
+          await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if(error) throw error;
+
+        closeAuth();
+
+        showMessage("Login successful.");
+
+      }else{
+
+        const { data, error } =
+          await supabaseClient.auth.signUp({
+            email,
+            password,
+            options:{
+              emailRedirectTo:
+                window.location.origin
+            }
+          });
+
+        if(error) throw error;
+
+        if(data.session){
+          closeAuth();
+          showMessage(
+            "Account created successfully."
+          );
+        }else{
+          showMessage(
+            "Account created. Please check your email and verify your account."
+          );
+        }
+      }
+
+    }catch(error){
+
+      showMessage(
+        error?.message ||
+        "Authentication failed."
+      );
+
+    }finally{
+
+      authSubmit.disabled = false;
+
+    }
+  }
+);
 
 
-  if(
-    hash &&
-    views[hash]
-  ){
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
 
-    openPage(hash);
+googleButton.addEventListener(
+  "click",
+  async () => {
 
-  }else{
+    googleButton.disabled = true;
+
+    try{
+
+      const { error } =
+        await supabaseClient.auth.signInWithOAuth({
+          provider:"google",
+          options:{
+            redirectTo:
+              window.location.origin
+          }
+        });
+
+      if(error) throw error;
+
+    }catch(error){
+
+      showMessage(
+        error?.message ||
+        "Google login could not start."
+      );
+
+      googleButton.disabled = false;
+    }
+  }
+);
+
+
+/* =========================================================
+   SIGN OUT
+   Same Profile button becomes Sign Out after login.
+========================================================= */
+
+loginButton.addEventListener(
+  "click",
+  async () => {
+
+    if(!currentUser) return;
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+    if(error){
+      showMessage(error.message);
+      return;
+    }
+
+    currentUser = null;
+
+    await loadProfile();
 
     openPage("home");
 
+    showMessage("Signed out successfully.");
   }
-
-}
-
-
-loadPage();
-
-
-/* =========================================================
-   TOP PROFILE
-========================================================= */
-
-document
-  .getElementById("topProfile")
-  .addEventListener(
-    "click",
-    () => {
-
-      openPage("profile");
-
-    }
-  );
-
-
-/* =========================================================
-   START PLAYING
-========================================================= */
-
-document
-  .getElementById("startPlaying")
-  .addEventListener(
-    "click",
-    () => {
-
-      openPage("games");
-
-    }
-  );
-
-
-/* =========================================================
-   VIEW RANK
-========================================================= */
-
-document
-  .getElementById("viewRank")
-  .addEventListener(
-    "click",
-    () => {
-
-      openPage("rank");
-
-    }
-  );
+);
 
 
 /* =========================================================
    GAME CARDS
+   For now they open a clear status message.
+   This avoids pretending a game engine exists.
 ========================================================= */
 
 document
   .querySelectorAll(".game-card")
-  .forEach(
-    card => {
+  .forEach(card => {
 
-      card.addEventListener(
-        "click",
-        () => {
+    card.addEventListener(
+      "click",
+      () => {
 
-          const game =
-            card.dataset.game;
+        const game =
+          card.dataset.game;
 
+        sessionStorage.setItem(
+          "selectedGame",
+          game
+        );
 
-          sessionStorage.setItem(
-            "selectedGame",
-            game
-          );
+        showMessage(
+          game +
+          " is selected. The game engine will be added here next."
+        );
+      }
+    );
 
-
-          alert(
-            game +
-            " game will open here when the game engine is connected."
-          );
-
-        }
-      );
-
-    }
-  );
+  });
 
 
 /* =========================================================
@@ -4170,221 +4501,35 @@ document
 ========================================================= */
 
 const rankList =
-  document.getElementById(
-    "rankList"
-  );
-
+  document.getElementById("rankList");
 
 function createRankList(){
-
   rankList.innerHTML = "";
 
-
-  for(
-    let i = 1;
-    i <= 100;
-    i++
-  ){
+  for(let i=1;i<=100;i++){
 
     const row =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
-
-    row.className =
-      "rank-row";
-
+    row.className = "rank-row";
 
     row.innerHTML = `
-
       <div class="rank-position">
         ${String(i).padStart(2,"0")}
       </div>
-
       <div class="rank-name">
         User
       </div>
-
       <div class="rank-score">
         —
       </div>
-
     `;
 
-
-    rankList.appendChild(
-      row
-    );
-
+    rankList.appendChild(row);
   }
-
 }
-
 
 createRankList();
-
-
-/* =========================================================
-   AUTH MODAL
-========================================================= */
-
-const authModal =
-  document.getElementById(
-    "authModal"
-  );
-
-
-document
-  .getElementById("loginButton")
-  .addEventListener(
-    "click",
-    () => {
-
-      authModal.classList.add(
-        "show"
-      );
-
-    }
-  );
-
-
-document
-  .getElementById("closeModal")
-  .addEventListener(
-    "click",
-    () => {
-
-      authModal.classList.remove(
-        "show"
-      );
-
-    }
-  );
-
-
-authModal.addEventListener(
-  "click",
-  event => {
-
-    if(
-      event.target === authModal
-    ){
-
-      authModal.classList.remove(
-        "show"
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   AUTH TABS
-========================================================= */
-
-const authTabs =
-  document.querySelectorAll(
-    ".auth-tab"
-  );
-
-
-authTabs.forEach(
-  tab => {
-
-    tab.addEventListener(
-      "click",
-      function(){
-
-        authTabs.forEach(
-          item => {
-
-            item.classList.remove(
-              "active"
-            );
-
-          }
-        );
-
-
-        this.classList.add(
-          "active"
-        );
-
-
-        const submit =
-          document.querySelector(
-            ".auth-submit"
-          );
-
-
-        submit.textContent =
-          this.dataset.auth === "login"
-          ? "Login"
-          : "Create Account";
-
-      }
-    );
-
-  }
-);
-
-
-/* =========================================================
-   AUTH FORM
-========================================================= */
-
-document
-  .getElementById("authForm")
-  .addEventListener(
-    "submit",
-    event => {
-
-      event.preventDefault();
-
-
-      const email = document.getElementById("authEmail").value.trim();
-const password = document.getElementById("authPassword").value;
-
-if (!email || !password) {
-  alert("Please enter email and password.");
-  return;
-}
-
-const { data, error } = await supabaseClient.auth.signUp({
-  email: email,
-  password: password
-});
-
-if (error) {
-  alert(error.message);
-  return;
-}
-
-alert("Account created successfully. Please check your email to verify your account.");
-
-    }
-  );
-
-
-/* =========================================================
-   GOOGLE
-========================================================= */
-
-document
-  .getElementById("googleButton")
-  .addEventListener(
-    "click",
-    () => {
-
-      alert(
-        "Google login will be connected with Supabase next."
-      );
-
-    }
-  );
 
 
 /* =========================================================
@@ -4396,46 +4541,35 @@ function detectDevice(){
   const width =
     window.innerWidth;
 
-
   if(width <= 380){
 
     document.body.dataset.device =
       "small-mobile";
 
-  }
-
-  else if(width <= 768){
+  }else if(width <= 768){
 
     document.body.dataset.device =
       "mobile";
 
-  }
-
-  else if(width <= 1050){
+  }else if(width <= 1050){
 
     document.body.dataset.device =
       "tablet";
 
-  }
-
-  else{
+  }else{
 
     document.body.dataset.device =
       "desktop";
 
   }
-
 }
 
-
 detectDevice();
-
 
 window.addEventListener(
   "resize",
   detectDevice
 );
-
 
 window.addEventListener(
   "orientationchange",
@@ -4452,18 +4586,34 @@ window.addEventListener(
   loadPage
 );
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script>
-  const SUPABASE_URL = "https://ykkfxytxdymmbcykoikw.supabase.co";
+/* =========================================================
+   STARTUP
+========================================================= */
 
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA";
+(async function(){
 
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
+  loadPage();
+
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if(error){
+    console.warn(
+      "Supabase session:",
+      error.message
+    );
+    updateProfileUI();
+    return;
+  }
+
+  await handleSession(
+    data.session
   );
+
+})();
+
 </script>
+
 </body>
 </html>
