@@ -434,8 +434,16 @@ $("gameGrid").innerHTML = games.map(g => `
     <span class="play">Play now ${icon("arrow")}</span>
   </button>`).join("");
 document.querySelectorAll(".game").forEach(card => card.addEventListener("click", () => {
+  const routes = {
+    "Memory":"/memorigame/",
+    "Number Logic":"/numberlogic/",
+    "Sequences":"/sequences/",
+    "Focus":"/focus/",
+    "Shape Logic":"/shapelogic/",
+    "Code Breaker":"/codebreaker/"
+  };
   sessionStorage.setItem("selectedGame", card.dataset.game);
-  toast(card.dataset.game + " is coming soon. The game engine is next.");
+  window.location.href = routes[card.dataset.game];
 }));
 
 /* ---------- RANK ---------- */
