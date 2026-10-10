@@ -222,10 +222,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 /* ---------- POLISHED MOBILE GAMES + LEADERBOARD ---------- */
 .games{grid-template-columns:minmax(0,1fr);gap:14px;max-width:760px}
 .memory-feature{min-height:205px;max-width:100%;animation:cardRise .5s cubic-bezier(.2,.8,.2,1) both}
-.coming-soon{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px dashed #b8d9c6;border-radius:20px;background:linear-gradient(110deg,#f2faf5,#fff);color:var(--text);animation:cardRise .6s .08s both}
-.coming-mark{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:14px;background:#e2f4e9;color:var(--green);font-size:27px;font-weight:500}
-.coming-soon b{display:block;font-family:var(--head);font-size:16px;letter-spacing:-.2px}
-.coming-soon p{margin-top:2px;color:var(--muted);font-size:13px}
+.coming-soon-text{margin-top:2px;text-align:center;color:var(--muted);font-size:13px;font-weight:500;animation:cardRise .45s ease both}
 .podium{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
 .pod{min-width:0;padding:18px 10px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;animation:podRise .55s cubic-bezier(.2,.8,.2,1) both}
 .pod:nth-child(2){animation-delay:.08s}.pod:nth-child(3){animation-delay:.16s}
@@ -472,10 +469,7 @@ $("gameGrid").innerHTML = `
     <p>Remember the tiles, beat each round, and improve your score.</p>
     <span class="play">Play now ${icon("arrow")}</span>
   </button>
-  <div class="coming-soon" aria-live="polite">
-    <span class="coming-mark">+</span>
-    <div><b>More games are on the way</b><p>New challenges will be added soon.</p></div>
-  </div>`;
+  <p class="coming-soon-text">More games coming soon</p>`;
 $("gameGrid").querySelector(".game").addEventListener("click", () => {
   sessionStorage.setItem("selectedGame", "Memory");
   window.location.href = "/memorigame/";
