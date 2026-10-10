@@ -457,22 +457,19 @@ $("rankList").innerHTML = '<div class="empty"><b>Loading leaderboard…</b></div
 async function loadLeaderboard(){
   const podium = $("podium"), list = $("rankList");
   list.innerHTML = '<div class="empty"><b>Loading leaderboard…</b></div>';
-  const {data:players,error} = await supabaseClient.from("profiles").select("id,username,avatar_url,points,xp,level,games_played").order("points",{ascending:false}).order("xp",{ascending:false}).limit(100);
+  const {data:players,error} = await supabaseClient.rpc("get_public_leaderboard");
   if(error){
     console.error("Leaderboard load failed:",error.message);
     podium.innerHTML = "";
     list.innerHTML = '<div class="empty"><b>Leaderboard unavailable</b><p>Could not load ranks. Please try again.</p></div>';
     return;
   }
-  const ranked = (players || []).filter(p => Number(p.games_played || 0) > 0 || Number(p.points || 0) > 0);
-  if(!ranked.length){
-    podium.innerHTML = "";
-    list.innerHTML = '<div class="empty"><b>No ranked players yet</b><p>Play a game to appear on the leaderboard.</p></div>';
-    return;
-  }
+  const ranked = (players || []).slice(0,100);
+  const displayRows = ranked.slice();
+  while(displayRows.length < 100) displayRows.push({id:"guest-"+displayRows.length,username:"Guest",points:0,games_played:0,level:1,isGuest:true});
   const medalCards = [{index:1,label:"Silver",cls:"s",colors:["#f8fafc","#cbd5e1","#94a3b8","#94a3b8"]},{index:0,label:"Gold",cls:"g",colors:["#fff3a3","#f5c542","#c58a13","#d4a72c"]},{index:2,label:"Bronze",cls:"b",colors:["#e8b08a","#b87333","#7a421f","#9a5a2a"]}];
-  podium.innerHTML = medalCards.map(m=>{ const p=ranked[m.index]; return '<div class="pod ' + m.cls + '">' + (p ? medal(m.colors[0],m.colors[1],m.colors[2],m.colors[3],m.index+1) : "") + '<b>' + m.label + '</b><small>' + (p ? esc(p.username || "Player") : "No player yet") + '</small><small>' + (p ? Number(p.points||0) + " points" : "") + '</small></div>'; }).join("");
-  list.innerHTML = ranked.map((p,i)=>'<div class="row"><div class="n">' + String(i+1).padStart(2,"0") + '</div><div>' + esc(p.username || "Player") + '</div><div class="s">' + Number(p.points||0) + ' pts</div></div>').join("");
+  podium.innerHTML = medalCards.map(m=>{ const p=displayRows[m.index]; return '<div class="pod ' + m.cls + '">' + medal(m.colors[0],m.colors[1],m.colors[2],m.colors[3],m.index+1) + '<b>' + m.label + '</b><small>' + esc(p.username || "Guest") + '</small><small>' + Number(p.points||0) + ' points</small></div>'; }).join("");
+  list.innerHTML = displayRows.map((p,i)=>'<div class="row' + (currentUser && p.id===currentUser.id ? ' me' : '') + '"><div class="n">' + String(i+1).padStart(2,"0") + '</div><div>' + esc(p.username || "Guest") + (currentUser && p.id===currentUser.id ? ' <b>(You)</b>' : '') + '</div><div class="s">' + Number(p.points||0) + ' pts</div></div>').join("");
   if(currentUser){ const myIndex=ranked.findIndex(p=>p.id===currentUser.id); $("rankStatus").textContent=myIndex>=0 ? "Rank #" + (myIndex+1) + " · " + Number(ranked[myIndex].points||0) + " points" : "Play a game to join the leaderboard"; $("rankCircle").textContent=myIndex>=0 ? "#" + (myIndex+1) : "–"; }
 }
 
