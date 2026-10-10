@@ -284,7 +284,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
       <div class="sec-title">Your progress</div>
       <div class="stats">
         <div class="stat" style="--c:#15945f"><div class="ic"><svg class="i"><use href="#star"/></svg></div><div><b id="sLevel">1</b><span>Level</span></div></div>
-        <div class="stat" style="--c:#19a96d"><div class="ic"><svg class="i"><use href="#bolt"/></svg></div><div><b id="sXp">0</b><span>XP</span></div></div>
+        
         <div class="stat" style="--c:#19a96d"><div class="ic"><svg class="i"><use href="#coin"/></svg></div><div><b id="sPoints">0</b><span>Points</span></div></div>
         <div class="stat" style="--c:#0f8f5a"><div class="ic"><svg class="i"><use href="#pad"/></svg></div><div><b id="sGames">0</b><span>Games</span></div></div>
       </div>
@@ -292,11 +292,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 
     <div class="section two">
       <div class="glass">
-        <div class="sec-title">Next level</div>
-        <div class="xp">
-          <div class="xp-top"><span id="xpLabel">0 / 100 XP</span><span id="xpLeft">100 XP to go</span></div>
-          <div class="bar"><i id="xpBar"></i></div>
-        </div>
+        <div class="sec-title">Your ranking</div>
         <div class="rank-mini">
           <div class="rc" id="rankCircle">–</div>
           <div><b class="rank-name" id="rankName">Guest</b><small id="rankStatus">Play a game to join the leaderboard</small></div>
@@ -332,7 +328,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
       </div>
       <div class="pgrid">
         <div><b id="pLevel">1</b><span>Level</span></div>
-        <div><b id="pXp">0</b><span>XP</span></div>
+        
         <div><b id="pPoints">0</b><span>Points</span></div>
         <div><b id="pGames">0</b><span>Games played</span></div>
       </div>
@@ -517,13 +513,9 @@ function updateProfileUI(){
   $("topUserName").textContent = name;
   $("topProfile").innerHTML = avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : icon("user");
 
-  const vals = {sLevel:p.level,sXp:p.xp,sPoints:p.points,sGames:p.games_played,pLevel:p.level,pXp:p.xp,pPoints:p.points,pGames:p.games_played};
+  const vals = {sLevel:p.level,sPoints:p.points,sGames:p.games_played,pLevel:p.level,pPoints:p.points,pGames:p.games_played};
   Object.entries(vals).forEach(([id,v]) => $(id).textContent = v ?? 0);
 
-  const need = 100, into = (p.xp || 0) % need;
-  $("xpLabel").textContent = `${into} / ${need} XP`;
-  $("xpLeft").textContent = `${need - into} XP to go`;
-  $("xpBar").style.width = into + "%";
 
   $("rankName").textContent = name;
   $("rankStatus").textContent = guest ? "Play a game to join the leaderboard" : "Progress saved";
