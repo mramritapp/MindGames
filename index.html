@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>MindGames</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
   --head:"Bricolage Grotesque",system-ui,sans-serif;
   --body:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input,textarea{ -webkit-user-select:text;user-select:text }
 html{scroll-behavior:auto}
 body{min-height:100vh;background:#fff;color:var(--text);font-family:var(--body);font-size:15px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
@@ -224,8 +224,8 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .memory-feature{min-height:205px;max-width:100%;animation:cardRise .5s cubic-bezier(.2,.8,.2,1) both}
 .coming-soon-text{margin-top:2px;text-align:center;color:var(--muted);font-size:13px;font-weight:500;animation:cardRise .45s ease both}
 .podium{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
-.pod{min-width:0;padding:18px 10px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;animation:podRise .55s cubic-bezier(.2,.8,.2,1) both}
-.pod:nth-child(2){animation-delay:.08s}.pod:nth-child(3){animation-delay:.16s}
+.pod{min-width:0;padding:18px 10px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;animation:none}
+.pod:nth-child(2),.pod:nth-child(3){animation-delay:0}
 .pod.g{padding:22px 10px 18px}
 .pod svg,.pod.g svg{width:52px;height:52px;margin:0 auto 5px;filter:drop-shadow(0 5px 7px rgba(0,0,0,.12))}
 .pod b{width:100%;font-family:var(--head);font-size:clamp(12px,1.5vw,16px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
@@ -446,6 +446,7 @@ const navButtons = document.querySelectorAll("[data-page]");
 
 function openPage(page){
   if(!views[page]) return;
+  if(!currentUser){ openAuth("login"); return; }
   Object.values(views).forEach(v => v.classList.remove("active"));
   views[page].classList.add("active");
   $("pageTitle").textContent = pageData[page][0];
@@ -521,10 +522,11 @@ function openAuth(mode="login"){
   authSubmit.textContent = mode === "login" ? "Log in" : "Create account";
   passwordInput.autocomplete = mode === "login" ? "current-password" : "new-password";
 }
-const closeAuth = () => authModal.classList.remove("show");
+const closeAuth = () => { if(currentUser) authModal.classList.remove("show"); };
+$("closeModal").hidden = true;
 $("closeModal").addEventListener("click", closeAuth);
-authModal.addEventListener("click", e => { if(e.target === authModal) closeAuth(); });
-document.addEventListener("keydown", e => { if(e.key === "Escape") closeAuth(); });
+authModal.addEventListener("click", e => { if(e.target === authModal && !currentUser) openAuth("login"); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !currentUser) { e.preventDefault(); openAuth("login"); } });
 authTabs.forEach(t => t.addEventListener("click", () => openAuth(t.dataset.auth)));
 
 /* ---------- PROFILE UI ---------- */
@@ -576,7 +578,7 @@ async function handleSession(session){
   currentUser = session?.user || null;
   await loadProfile();
 }
-supabaseClient.auth.onAuthStateChange((_e, session) => setTimeout(() => handleSession(session), 0));
+supabaseClient.auth.onAuthStateChange((_e, session) => setTimeout(async () => { await handleSession(session); if(!currentUser) openAuth("login"); else authModal.classList.remove("show"); }, 0));
 
 /* ---------- EMAIL AUTH ---------- */
 authForm.addEventListener("submit", async e => {
@@ -592,8 +594,8 @@ authForm.addEventListener("submit", async e => {
     }else{
       const { data, error } = await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin}});
       if(error) throw error;
-      if(data.session){ closeAuth(); toast("Account created."); }
-      else toast("Account created. Check your email to verify it.");
+      if(data.session){ authModal.classList.remove("show"); toast("Account created."); }
+      else { openAuth("login"); toast("Account created. Verify your email, then log in."); }
     }
   }catch(err){
     toast(err?.message || "Authentication failed.");
@@ -621,18 +623,20 @@ $("loginButton").addEventListener("click", async () => {
   if(error) return toast(error.message);
   currentUser = null;
   await loadProfile();
-  openPage("home");
-  toast("Signed out.");
+  openAuth("login");
+  toast("Please log in to continue.");
 });
 
 /* ---------- LIGHT INTERACTIONS ---------- */
 /* ---------- STARTUP ---------- */
 (async function(){
-  openPage(location.hash.slice(1) || "home");
   updateProfileUI();
   const { data, error } = await supabaseClient.auth.getSession();
-  if(error){ console.warn("Supabase session:", error.message); return; }
+  if(error){ console.warn("Supabase session:", error.message); openAuth("login"); return; }
   await handleSession(data.session);
+  if(!currentUser){ openAuth("login"); return; }
+  authModal.classList.remove("show");
+  openPage(location.hash.slice(1) || "home");
 })();
 </script>
 </body>
