@@ -107,6 +107,9 @@ h1{font-size:clamp(30px,6vw,42px);letter-spacing:-1.8px;line-height:.98;font-wei
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $=id=>document.getElementById(id);
+const SUPABASE_URL="https://ykkfxytxdymmbcykoikw.supabase.co";
+const SUPABASE_KEY="sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0,savedRunScore=0,runCounted=false;
 $("best").textContent=best;
 
@@ -182,12 +185,8 @@ if(win)saveScore();else saveScore();
 
 async function saveScore(){
 try{
-if(!window.supabase?.createClient)return;
-const client=window.supabase.createClient(
-"https://ykkfxytxdymmbcykoikw.supabase.co",
-"sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA"
-);
-const {data:sessionData,error:sessionError}=await client.auth.getSession();
+if(!supabaseClient)return;
+const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
 if(sessionError)throw sessionError;
 const user=sessionData?.session?.user;
 if(!user){
@@ -199,7 +198,7 @@ const delta=Math.max(0,Number(runScore||0)-Number(savedRunScore||0));
 const needsGameCount=!runCounted;
 if(delta===0&&!needsGameCount)return;
 
-const {data:p,error:readError}=await client.from("profiles")
+const {data:p,error:readError}=await supabaseClient.from("profiles")
 .select("id,username,avatar_url,level,xp,points,games_played,best_score")
 .eq("id",user.id).maybeSingle();
 if(readError)throw readError;
@@ -224,7 +223,7 @@ games_played:Number(old.games_played||0)+(needsGameCount?1:0),
 best_score:Math.max(Number(old.best_score||0),Number(score||0))
 };
 
-const {error:writeError}=await client.from("profiles")
+const {error:writeError}=await supabaseClient.from("profiles")
 .upsert(updates,{onConflict:"id"});
 if(writeError)throw writeError;
 
