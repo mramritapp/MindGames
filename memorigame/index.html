@@ -1,0 +1,166 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff">
+<title>Memory Matrix | MindGames</title>
+<style>
+:root{--green:#168653;--deep:#0b6840;--pale:#e9f6ee;--ink:#17231c;--muted:#718078;--line:#dce9e0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:#fff;color:var(--ink);font-family:Inter,system-ui,sans-serif}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bg{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(#16865312 1px,transparent 1px),linear-gradient(90deg,#16865312 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(#000,#000 52%,transparent);pointer-events:none}
+.wrap{width:min(700px,100%);min-height:100vh;margin:auto;padding:14px 18px 18px;display:flex;flex-direction:column}
+.nav{height:42px;display:flex;align-items:center;justify-content:space-between}
+.back,.restart{height:39px;border:1px solid var(--line);background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;color:#56665c;font-size:13px;font-weight:750}
+.back{padding:0 12px}.restart{width:39px}
+.logo{font-size:18px;font-weight:850;letter-spacing:-.6px}.logo span{color:var(--green)}
+.hero{margin:20px 0 15px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.kicker{color:var(--green);font-size:10px;font-weight:850;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:7px}
+h1{font-size:clamp(30px,6vw,42px);letter-spacing:-1.8px;line-height:.98;font-weight:850}
+.round{padding:8px 11px;border-radius:11px;border:1px solid #cde5d5;background:#f1faf4;color:var(--deep);font-size:12px;font-weight:800;white-space:nowrap}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 13px;box-shadow:0 4px 12px #17482c06}
+.metric label{display:block;font-size:10px;letter-spacing:.7px;color:var(--muted);font-weight:750}
+.metric strong{display:block;font-size:22px;letter-spacing:-.5px;font-variant-numeric:tabular-nums;margin-top:1px}
+.game{border:1px solid var(--line);background:#ffffffed;border-radius:23px;padding:clamp(13px,3vw,21px);box-shadow:0 16px 42px #17482c0c}
+.gamehead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.state{font-size:13px;font-weight:800}.mini{font-size:11px;color:var(--muted)}
+.board{width:min(100%,450px);margin:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(7px,1.7vw,11px)}
+.tile{aspect-ratio:1;border:1px solid #d7e8dd;border-radius:clamp(10px,2vw,15px);background:linear-gradient(145deg,#fbfdfb,#f1f8f3);position:relative;display:grid;place-items:center;overflow:hidden;transition:background .12s,border-color .12s,transform .12s}
+.tile:before{content:"";width:25%;height:25%;border:2px solid #b7d6c2;border-radius:5px;transform:rotate(45deg);transition:all .12s}
+.tile.lit{background:linear-gradient(145deg,#1c9c60,#0c7044);border-color:#08633c;box-shadow:inset 0 0 0 2px #ffffff24,0 4px 12px #16865324}
+.tile.lit:before{border-color:#fff;background:#ffffff20;box-shadow:0 0 0 5px #ffffff10}
+.tile.good{background:#e4f6eb;border:2px solid var(--green)}.tile.good:before{border-color:var(--green);background:#16865318}
+.tile.bad{background:#fff0ed;border:2px solid #d36a57}.tile.bad:before{border-color:#d36a57}
+.tile:active{transform:scale(.97)}.tile:disabled{cursor:default}
+.track{height:5px;background:#edf4ef;border-radius:9px;overflow:hidden;margin:15px 1px 0}
+.track span{display:block;width:0;height:100%;background:var(--green);transition:width .18s}
+.buttons{display:flex;justify-content:center;gap:8px;margin-top:14px}
+.btn{height:43px;min-width:118px;padding:0 18px;border-radius:12px;font-size:13px;font-weight:800}
+.mainbtn{background:var(--green);color:#fff;box-shadow:0 5px 12px #16865324}
+.mainbtn:hover{background:var(--deep)}
+.altbtn{background:#fff;border:1px solid var(--line);color:#596a60}
+.footer{text-align:center;color:#85928a;font-size:11px;padding-top:12px;margin-top:auto}
+.modal{position:fixed;inset:0;background:#ffffffb8;display:none;align-items:center;justify-content:center;padding:20px;z-index:4}
+.modal.show{display:flex}.dialog{width:min(330px,100%);border:1px solid var(--line);border-radius:23px;background:white;padding:25px;text-align:center;box-shadow:0 20px 60px #173d281f}
+.dialog .symbol{width:48px;height:48px;border-radius:16px;background:var(--pale);color:var(--green);display:grid;place-items:center;margin:0 auto 13px}
+.dialog h2{font-size:27px;letter-spacing:-1px}.dialog p{font-size:13px;color:var(--muted);line-height:1.5;margin-top:7px}
+.dialog .btn{width:100%;margin-top:17px}
+@media(max-width:480px){
+.wrap{padding:9px 11px 12px}.hero{margin:15px 0 11px}
+.kicker{margin-bottom:6px}.metrics{gap:6px;margin-bottom:9px}
+.metric{padding:8px 10px;border-radius:12px}.metric strong{font-size:20px}
+.game{padding:10px;border-radius:19px}.gamehead{margin-bottom:10px}
+.board{gap:7px}.track{margin-top:11px}.buttons{margin-top:11px}
+.btn{height:41px;min-width:108px}.footer{padding-top:8px}
+}
+@media(max-height:740px) and (max-width:480px){
+.wrap{padding-top:6px;padding-bottom:6px}.hero{margin:10px 0 8px}
+.metrics{margin-bottom:7px}.game{padding:9px}.board{gap:6px}
+.gamehead{margin-bottom:7px}.track{margin-top:8px}
+.buttons{margin-top:8px}.btn{height:38px}.footer{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<main class="wrap">
+<header class="nav">
+<button class="back" id="back">
+<svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>MindGames
+</button>
+<div class="logo">Memory <span>Matrix</span></div>
+<button class="restart" id="restart" aria-label="Restart">
+<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2 5M20 5v6h-6"/></svg>
+</button>
+</header>
+<section class="hero">
+<div><div class="kicker">Mind training</div><h1>Memory Matrix</h1></div>
+<div class="round">ROUND <span id="round">1</span></div>
+</section>
+<section class="metrics">
+<div class="metric"><label>SCORE</label><strong id="score">0</strong></div>
+<div class="metric"><label>BEST</label><strong id="best">0</strong></div>
+<div class="metric"><label>REMEMBER</label><strong id="count">3</strong></div>
+</section>
+<section class="game">
+<div class="gamehead"><div class="state" id="state">Ready to play</div><div class="mini">4 × 4 GRID</div></div>
+<div class="board" id="board"></div>
+<div class="track"><span id="progress"></span></div>
+<div class="buttons">
+<button class="btn mainbtn" id="start">Start round</button>
+<button class="btn altbtn" id="clear" hidden>Reset picks</button>
+</div>
+</section>
+<footer class="footer">MindGames</footer>
+</main>
+<div class="modal" id="modal"><div class="dialog">
+<div class="symbol"><svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg></div>
+<h2 id="modalTitle">Nice work!</h2><p id="modalText"></p>
+<button class="btn mainbtn" id="next">Continue</button>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);
+let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0;
+$("best").textContent=best;
+function cancel(){timers.forEach(clearTimeout);timers=[];generation++}
+function later(fn,ms){timers.push(setTimeout(fn,ms))}
+function progress(n,total){$("progress").style.width=(100*n/total)+"%"}
+function makeBoard(){
+$("board").innerHTML=Array.from({length:16},(_,i)=>`<button class="tile" data-i="${i}" aria-label="Tile ${i+1}" disabled></button>`).join("");
+$("board").querySelectorAll(".tile").forEach((el,i)=>el.addEventListener("click",()=>pick(i,el)))
+}
+function begin(){
+cancel();phase="show";picked.clear();targets=[];
+const count=Math.min(3+Math.floor((round-1)/2),12);$("count").textContent=count;
+while(targets.length<count){let n=Math.floor(Math.random()*16);if(!targets.includes(n))targets.push(n)}
+[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true});
+$("start").hidden=true;$("clear").hidden=true;$("state").textContent="Remember the green tiles";progress(0,count);
+let id=generation;const delay=Math.max(750,1550-(round-1)*35);
+targets.forEach((n,i)=>later(()=>{if(id===generation)$("board").children[n].classList.add("lit")},100+i*50));
+later(()=>{if(id!==generation)return;[...$("board").children].forEach(el=>{el.className="tile";el.disabled=false});phase="pick";$("state").textContent="Select the tiles";$("clear").hidden=false},100+targets.length*50+delay)
+}
+function pick(i,el){
+if(phase!=="pick"||picked.has(i))return;
+picked.add(i);el.classList.add(targets.includes(i)?"good":"bad");progress(picked.size,targets.length);
+if(picked.size===targets.length){phase="check";[...$("board").children].forEach(el=>el.disabled=true);later(check,380)}
+}
+function check(){
+const found=[...picked].filter(i=>targets.includes(i)).length,win=found===targets.length;
+if(win){score+=round*10;runScore+=round*10;round++}
+$("score").textContent=score;$("round").textContent=round;
+if(score>best){best=score;localStorage.setItem("mindgames-matrix-best",best);$("best").textContent=best}
+$("modalTitle").textContent=win?"Perfect match!":"Round over";
+$("modalText").textContent=win?`All tiles found. Score: ${score}.`:`You found ${found} of ${targets.length} tiles. Score: ${score}.`;
+$("next").textContent=win?"Next round":"Try again";$("modal").classList.add("show");phase="result";
+if(!win)saveScore()
+}
+async function saveScore(){
+try{
+if(!window.supabase)return;
+const client=window.supabase.createClient("https://ykkfxytxdymmbcykoikw.supabase.co","sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA");
+const {data:{session}}=await client.auth.getSession();if(!session?.user||!runScore)return;
+const {data:p,error:r}=await client.from("profiles").select("xp,points,games_played,best_score").eq("id",session.user.id).maybeSingle();if(r||!p)return;
+await client.from("profiles").update({xp:Number(p.xp||0)+runScore,points:Number(p.points||0)+runScore,games_played:Number(p.games_played||0)+1,best_score:Math.max(Number(p.best_score||0),score)}).eq("id",session.user.id)
+}catch(e){console.warn("Could not save game score",e)}
+}
+$("start").addEventListener("click",begin);
+$("clear").addEventListener("click",()=>{if(phase!=="pick")return;picked.clear();[...$("board").children].forEach(el=>el.className="tile");progress(0,targets.length);$("state").textContent="Select the tiles"});
+$("next").addEventListener("click",()=>{
+$("modal").classList.remove("show");
+if($("modalTitle").textContent==="Round over"){round=1;score=0;runScore=0;$("round").textContent=1;$("score").textContent=0}
+$("count").textContent=Math.min(3+Math.floor((round-1)/2),12);begin()
+});
+$("restart").addEventListener("click",()=>{
+cancel();round=1;score=0;runScore=0;$("round").textContent=1;$("score").textContent=0;$("count").textContent=3;$("modal").classList.remove("show");phase="ready";$("state").textContent="Ready to play";$("start").hidden=false;$("clear").hidden=true;progress(0,3);[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true})
+});
+$("back").addEventListener("click",()=>location.href="../");
+makeBoard();progress(0,3);
+</script>
+</body>
+</html>
