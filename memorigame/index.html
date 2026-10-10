@@ -104,63 +104,152 @@ h1{font-size:clamp(30px,6vw,42px);letter-spacing:-1.8px;line-height:.98;font-wei
 <h2 id="modalTitle">Nice work!</h2><p id="modalText"></p>
 <button class="btn mainbtn" id="next">Continue</button>
 </div></div>
+
+<!-- Supabase library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $=id=>document.getElementById(id);
 let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0;
 $("best").textContent=best;
+
 function cancel(){timers.forEach(clearTimeout);timers=[];generation++}
 function later(fn,ms){timers.push(setTimeout(fn,ms))}
 function progress(n,total){$("progress").style.width=(100*n/total)+"%"}
+
 function makeBoard(){
 $("board").innerHTML=Array.from({length:16},(_,i)=>`<button class="tile" data-i="${i}" aria-label="Tile ${i+1}" disabled></button>`).join("");
-$("board").querySelectorAll(".tile").forEach((el,i)=>el.addEventListener("click",()=>pick(i,el)))
+$("board").querySelectorAll(".tile").forEach((el,i)=>el.addEventListener("click",()=>pick(i,el)));
 }
+
 function begin(){
 cancel();phase="show";picked.clear();targets=[];
-const count=Math.min(3+Math.floor((round-1)/2),12);$("count").textContent=count;
-while(targets.length<count){let n=Math.floor(Math.random()*16);if(!targets.includes(n))targets.push(n)}
-[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true});
-$("start").hidden=true;$("clear").hidden=true;$("state").textContent="Remember the green tiles";progress(0,count);
-let id=generation;const delay=Math.max(750,1550-(round-1)*35);
-targets.forEach((n,i)=>later(()=>{if(id===generation)$("board").children[n].classList.add("lit")},100+i*50));
-later(()=>{if(id!==generation)return;[...$("board").children].forEach(el=>{el.className="tile";el.disabled=false});phase="pick";$("state").textContent="Select the tiles";$("clear").hidden=false},100+targets.length*50+delay)
+const count=Math.min(3+Math.floor((round-1)/2),12);
+$("count").textContent=count;
+while(targets.length<count){
+let n=Math.floor(Math.random()*16);
+if(!targets.includes(n))targets.push(n);
 }
+[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true});
+$("start").hidden=true;
+$("clear").hidden=true;
+$("state").textContent="Remember the green tiles";
+progress(0,count);
+let id=generation;
+const delay=Math.max(750,1550-(round-1)*35);
+targets.forEach((n,i)=>later(()=>{
+if(id===generation)$("board").children[n].classList.add("lit");
+},100+i*50));
+later(()=>{
+if(id!==generation)return;
+[...$("board").children].forEach(el=>{el.className="tile";el.disabled=false});
+phase="pick";
+$("state").textContent="Select the tiles";
+$("clear").hidden=false;
+},100+targets.length*50+delay);
+}
+
 function pick(i,el){
 if(phase!=="pick"||picked.has(i))return;
-picked.add(i);el.classList.add(targets.includes(i)?"good":"bad");progress(picked.size,targets.length);
-if(picked.size===targets.length){phase="check";[...$("board").children].forEach(el=>el.disabled=true);later(check,380)}
+picked.add(i);
+el.classList.add(targets.includes(i)?"good":"bad");
+progress(picked.size,targets.length);
+if(picked.size===targets.length){
+phase="check";
+[...$("board").children].forEach(el=>el.disabled=true);
+later(check,380);
 }
+}
+
 function check(){
-const found=[...picked].filter(i=>targets.includes(i)).length,win=found===targets.length;
+const found=[...picked].filter(i=>targets.includes(i)).length;
+const win=found===targets.length;
 if(win){score+=round*10;runScore+=round*10;round++}
-$("score").textContent=score;$("round").textContent=round;
-if(score>best){best=score;localStorage.setItem("mindgames-matrix-best",best);$("best").textContent=best}
+$("score").textContent=score;
+$("round").textContent=round;
+if(score>best){
+best=score;
+localStorage.setItem("mindgames-matrix-best",best);
+$("best").textContent=best;
+}
 $("modalTitle").textContent=win?"Perfect match!":"Round over";
 $("modalText").textContent=win?`All tiles found. Score: ${score}.`:`You found ${found} of ${targets.length} tiles. Score: ${score}.`;
-$("next").textContent=win?"Next round":"Try again";$("modal").classList.add("show");phase="result";
-if(!win)saveScore()
+$("next").textContent=win?"Next round":"Try again";
+$("modal").classList.add("show");
+phase="result";
+if(!win)saveScore();
 }
+
 async function saveScore(){
 try{
-if(!window.supabase)return;
-const client=window.supabase.createClient("https://ykkfxytxdymmbcykoikw.supabase.co","sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA");
-const {data:{session}}=await client.auth.getSession();if(!session?.user||!runScore)return;
-const {data:p,error:r}=await client.from("profiles").select("xp,points,games_played,best_score").eq("id",session.user.id).maybeSingle();if(r||!p)return;
-await client.from("profiles").update({xp:Number(p.xp||0)+runScore,points:Number(p.points||0)+runScore,games_played:Number(p.games_played||0)+1,best_score:Math.max(Number(p.best_score||0),score)}).eq("id",session.user.id)
-}catch(e){console.warn("Could not save game score",e)}
+if(!window.supabase?.createClient)return;
+const client=window.supabase.createClient(
+"https://ykkfxytxdymmbcykoikw.supabase.co",
+"sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA"
+);
+const {data:{session},error:sessionError}=await client.auth.getSession();
+if(sessionError)throw sessionError;
+if(!session?.user||!runScore)return;
+
+const {data:p,error:r}=await client.from("profiles")
+.select("xp,points,games_played,best_score")
+.eq("id",session.user.id).maybeSingle();
+
+if(r)throw r;
+if(!p){
+console.warn("No profile row found for this user.");
+return;
 }
+
+const {error:updateError}=await client.from("profiles").update({
+xp:Number(p.xp||0)+runScore,
+points:Number(p.points||0)+runScore,
+games_played:Number(p.games_played||0)+1,
+best_score:Math.max(Number(p.best_score||0),score)
+}).eq("id",session.user.id);
+
+if(updateError)throw updateError;
+}catch(e){
+console.error("Could not save game score:",e.message||e);
+}
+}
+
 $("start").addEventListener("click",begin);
-$("clear").addEventListener("click",()=>{if(phase!=="pick")return;picked.clear();[...$("board").children].forEach(el=>el.className="tile");progress(0,targets.length);$("state").textContent="Select the tiles"});
+$("clear").addEventListener("click",()=>{
+if(phase!=="pick")return;
+picked.clear();
+[...$("board").children].forEach(el=>el.className="tile");
+progress(0,targets.length);
+$("state").textContent="Select the tiles";
+});
+
 $("next").addEventListener("click",()=>{
 $("modal").classList.remove("show");
-if($("modalTitle").textContent==="Round over"){round=1;score=0;runScore=0;$("round").textContent=1;$("score").textContent=0}
-$("count").textContent=Math.min(3+Math.floor((round-1)/2),12);begin()
+if($("modalTitle").textContent==="Round over"){
+round=1;score=0;runScore=0;
+$("round").textContent=1;
+$("score").textContent=0;
+}
+$("count").textContent=Math.min(3+Math.floor((round-1)/2),12);
+begin();
 });
+
 $("restart").addEventListener("click",()=>{
-cancel();round=1;score=0;runScore=0;$("round").textContent=1;$("score").textContent=0;$("count").textContent=3;$("modal").classList.remove("show");phase="ready";$("state").textContent="Ready to play";$("start").hidden=false;$("clear").hidden=true;progress(0,3);[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true})
+cancel();round=1;score=0;runScore=0;
+$("round").textContent=1;
+$("score").textContent=0;
+$("count").textContent=3;
+$("modal").classList.remove("show");
+phase="ready";
+$("state").textContent="Ready to play";
+$("start").hidden=false;
+$("clear").hidden=true;
+progress(0,3);
+[...$("board").children].forEach(el=>{el.className="tile";el.disabled=true});
 });
+
 $("back").addEventListener("click",()=>location.href="../");
-makeBoard();progress(0,3);
+makeBoard();
+progress(0,3);
 </script>
 </body>
 </html>
