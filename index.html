@@ -218,6 +218,58 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+
+/* ---------- POLISHED MOBILE GAMES + LEADERBOARD ---------- */
+.games{grid-template-columns:minmax(0,1fr);gap:14px;max-width:760px}
+.memory-feature{min-height:205px;max-width:100%;animation:cardRise .5s cubic-bezier(.2,.8,.2,1) both}
+.coming-soon{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px dashed #b8d9c6;border-radius:20px;background:linear-gradient(110deg,#f2faf5,#fff);color:var(--text);animation:cardRise .6s .08s both}
+.coming-mark{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:14px;background:#e2f4e9;color:var(--green);font-size:27px;font-weight:500}
+.coming-soon b{display:block;font-family:var(--head);font-size:16px;letter-spacing:-.2px}
+.coming-soon p{margin-top:2px;color:var(--muted);font-size:13px}
+.podium{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+.pod{min-width:0;padding:18px 10px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;animation:podRise .55s cubic-bezier(.2,.8,.2,1) both}
+.pod:nth-child(2){animation-delay:.08s}.pod:nth-child(3){animation-delay:.16s}
+.pod.g{padding:22px 10px 18px}
+.pod svg,.pod.g svg{width:52px;height:52px;margin:0 auto 5px;filter:drop-shadow(0 5px 7px rgba(0,0,0,.12))}
+.pod b{width:100%;font-family:var(--head);font-size:clamp(12px,1.5vw,16px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.pod small{display:block;max-width:100%;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+.pod small:nth-last-child(1){font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.rows{padding:4px 16px}
+.row{grid-template-columns:42px minmax(0,1fr) auto;gap:10px;min-height:62px}
+.row .n{font-size:14px;font-variant-numeric:tabular-nums}
+.player-name{min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:750;line-height:1.3}
+.row .s{white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums}
+.row .s strong{font-size:14px;color:var(--text);font-weight:800}
+.you-tag{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:5px;background:#e2f4e9;color:#0b7047;font-size:9px;font-weight:850;letter-spacing:.4px;vertical-align:2px}
+.row.me{margin:0 -7px;padding:0 7px;border-radius:12px;background:#f0faf4}
+@keyframes cardRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes podRise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:768px){
+  .games{grid-template-columns:minmax(0,1fr);gap:12px}
+  .memory-feature{min-height:190px}
+  .podium{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px}
+  .pod,.pod.g{padding:13px 5px 12px;border-radius:16px}
+  .pod svg,.pod.g svg{width:40px;height:40px;margin-bottom:3px}
+  .pod b{font-size:11px;letter-spacing:-.1px}
+  .pod small{font-size:10px;line-height:1.3}
+  .rows{padding:3px 10px;border-radius:18px}
+  .row{grid-template-columns:32px minmax(0,1fr) auto;gap:7px;min-height:58px}
+  .row .n{font-size:12px}
+  .player-name{font-size:12px}
+  .row .s{font-size:10px}
+  .row .s strong{font-size:12px}
+  .you-tag{font-size:8px;margin-left:3px}
+}
+@media(max-width:360px){
+  .podium{gap:5px}
+  .pod,.pod.g{padding:11px 3px}
+  .pod svg,.pod.g svg{width:34px;height:34px}
+  .pod small{font-size:9px}
+  .rows{padding:2px 7px}
+  .row{grid-template-columns:28px minmax(0,1fr) auto;gap:5px}
+}
+@media(prefers-reduced-motion:reduce){.memory-feature,.coming-soon,.pod{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -412,34 +464,22 @@ $("startPlaying").addEventListener("click", () => openPage("games"));
 if($("viewRank")) $("viewRank").addEventListener("click", () => openPage("rank"));
 window.addEventListener("popstate", () => openPage(location.hash.slice(1) || "home"));
 
-/* ---------- GAMES ---------- */
-const games = [
-  {name:"Memory",ic:"layers",c:"#15945f",d:"#0f8f5a",t:"Remember cards, patterns and positions as it gets harder."},
-  {name:"Number Logic",ic:"hash",c:"#19a96d",d:"#15945f",t:"Find how numbers connect and solve the missing value."},
-  {name:"Sequences",ic:"trend",c:"#0f8f5a",d:"#0b7047",t:"Work out what comes next in a changing pattern."},
-  {name:"Focus",ic:"target",c:"#19a96d",d:"#15945f",t:"Stay sharp and react to the right target, fast."},
-  {name:"Shape Logic",ic:"shapes",c:"#15945f",d:"#0b7047",t:"Spot the link between shapes and complete the set."},
-  {name:"Code Breaker",ic:"lock",c:"#0f8f5a",d:"#15945f",t:"Crack the hidden code using clues and logic."}
-];
-$("gameGrid").innerHTML = games.map(g => `
-  <button class="game" data-game="${g.name}" style="--c:${g.c};--d:${g.d}">
-    <div class="gico">${icon(g.ic)}</div>
-    <h3>${g.name}</h3>
-    <p>${g.t}</p>
+/* ---------- GAMES: ONLY THE WORKING MEMORY GAME ---------- */
+$("gameGrid").innerHTML = `
+  <button class="game memory-feature" data-game="Memory" style="--c:#15945f;--d:#0f8f5a">
+    <div class="gico">${icon("layers")}</div>
+    <h3>Memory Matrix</h3>
+    <p>Remember the tiles, beat each round, and improve your score.</p>
     <span class="play">Play now ${icon("arrow")}</span>
-  </button>`).join("");
-document.querySelectorAll(".game").forEach(card => card.addEventListener("click", () => {
-  const routes = {
-    "Memory":"/memorigame/",
-    "Number Logic":"/numberlogic/",
-    "Sequences":"/sequences/",
-    "Focus":"/focus/",
-    "Shape Logic":"/shapelogic/",
-    "Code Breaker":"/codebreaker/"
-  };
-  sessionStorage.setItem("selectedGame", card.dataset.game);
-  window.location.href = routes[card.dataset.game];
-}));
+  </button>
+  <div class="coming-soon" aria-live="polite">
+    <span class="coming-mark">+</span>
+    <div><b>More games are on the way</b><p>New challenges will be added soon.</p></div>
+  </div>`;
+$("gameGrid").querySelector(".game").addEventListener("click", () => {
+  sessionStorage.setItem("selectedGame", "Memory");
+  window.location.href = "/memorigame/";
+});
 
 /* ---------- RANK ---------- */
 function medal(a,b,c,ribbon,num){
@@ -467,7 +507,7 @@ async function loadLeaderboard(){
   while(displayRows.length < 100) displayRows.push({id:"guest-"+displayRows.length,username:"Guest",points:0,games_played:0,level:1,isGuest:true});
   const medalCards = [{index:1,label:"Silver",cls:"s",colors:["#f8fafc","#cbd5e1","#94a3b8","#94a3b8"]},{index:0,label:"Gold",cls:"g",colors:["#fff3a3","#f5c542","#c58a13","#d4a72c"]},{index:2,label:"Bronze",cls:"b",colors:["#e8b08a","#b87333","#7a421f","#9a5a2a"]}];
   podium.innerHTML = medalCards.map(m=>{ const p=displayRows[m.index]; return '<div class="pod ' + m.cls + '">' + medal(m.colors[0],m.colors[1],m.colors[2],m.colors[3],m.index+1) + '<b>' + m.label + '</b><small>' + esc(p.username || "Guest") + '</small><small>' + Number(p.points||0) + ' points</small></div>'; }).join("");
-  list.innerHTML = displayRows.map((p,i)=>'<div class="row' + (currentUser && p.id===currentUser.id ? ' me' : '') + '"><div class="n">' + String(i+1).padStart(2,"0") + '</div><div>' + esc(p.username || "Guest") + (currentUser && p.id===currentUser.id ? ' <b>(You)</b>' : '') + '</div><div class="s">' + Number(p.points||0) + ' pts</div></div>').join("");
+  list.innerHTML = displayRows.map((p,i)=>'<div class="row' + (currentUser && p.id===currentUser.id ? ' me' : '') + '"><div class="n">' + String(i+1).padStart(2,"0") + '</div><div class="player-name" title="' + esc(p.username || "Guest") + '">' + esc(p.username || "Guest") + (currentUser && p.id===currentUser.id ? ' <span class="you-tag">YOU</span>' : '') + '</div><div class="s"><strong>' + Number(p.points||0).toLocaleString("en-US") + '</strong><span> pts</span></div></div>').join("");
   if(currentUser){ const myIndex=ranked.findIndex(p=>p.id===currentUser.id); $("rankStatus").textContent=myIndex>=0 ? "Rank #" + (myIndex+1) + " · " + Number(ranked[myIndex].points||0) + " points" : "Play a game to join the leaderboard"; $("rankCircle").textContent=myIndex>=0 ? "#" + (myIndex+1) : "–"; }
 }
 
