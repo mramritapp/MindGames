@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#fff">
 <title>Memory Matrix | MindGames</title>
 <style>
 :root{--green:#168653;--deep:#0b6840;--pale:#e9f6ee;--ink:#17231c;--muted:#718078;--line:#dce9e0}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} body{visibility:hidden} body.auth-ready{visibility:visible}
 body{min-height:100vh;background:#fff;color:var(--ink);font-family:Inter,system-ui,sans-serif}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
 svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -110,6 +110,13 @@ const $=id=>document.getElementById(id);
 const SUPABASE_URL="https://ykkfxytxdymmbcykoikw.supabase.co";
 const SUPABASE_KEY="sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+(async function requireLogin(){
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error||!data?.session?.user){ location.replace("../#home"); return; }
+    document.body.classList.add("auth-ready");
+  }catch(_){ location.replace("../#home"); }
+})();
 let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0,savedRunScore=0,runCounted=false;
 $("best").textContent=best;
 
