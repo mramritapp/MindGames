@@ -105,11 +105,10 @@ h1{font-size:clamp(30px,6vw,42px);letter-spacing:-1.8px;line-height:.98;font-wei
 <button class="btn mainbtn" id="next">Continue</button>
 </div></div>
 
-<!-- Supabase library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $=id=>document.getElementById(id);
-let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0;
+let round=1,score=0,best=Number(localStorage.getItem("mindgames-matrix-best")||0),targets=[],picked=new Set(),phase="ready",timers=[],generation=0,runScore=0,savedRunScore=0,runCounted=false;
 $("best").textContent=best;
 
 function cancel(){timers.forEach(clearTimeout);timers=[];generation++}
@@ -176,7 +175,10 @@ $("modalText").textContent=win?`All tiles found. Score: ${score}.`:`You found ${
 $("next").textContent=win?"Next round":"Try again";
 $("modal").classList.add("show");
 phase="result";
-if(!win)saveScore();
+
+/* Save successful-round points immediately.
+   The first successful round also counts this game once. */
+if(win)saveScore();else saveScore();
 }
 
 async function saveScore(){
@@ -186,34 +188,57 @@ const client=window.supabase.createClient(
 "https://ykkfxytxdymmbcykoikw.supabase.co",
 "sb_publishable_p5qalIgBoKB2uBpjx4wHog_NcacqmQA"
 );
-const {data:{session},error:sessionError}=await client.auth.getSession();
+const {data:sessionData,error:sessionError}=await client.auth.getSession();
 if(sessionError)throw sessionError;
-if(!session?.user||!runScore)return;
-
-const {data:p,error:r}=await client.from("profiles")
-.select("xp,points,games_played,best_score")
-.eq("id",session.user.id).maybeSingle();
-
-if(r)throw r;
-if(!p){
-console.warn("No profile row found for this user.");
+const user=sessionData?.session?.user;
+if(!user){
+console.warn("Stats not saved: log in to MindGames first.");
 return;
 }
 
-const {error:updateError}=await client.from("profiles").update({
-xp:Number(p.xp||0)+runScore,
-points:Number(p.points||0)+runScore,
-games_played:Number(p.games_played||0)+1,
-best_score:Math.max(Number(p.best_score||0),score)
-}).eq("id",session.user.id);
+const delta=Math.max(0,Number(runScore||0)-Number(savedRunScore||0));
+const needsGameCount=!runCounted;
+if(delta===0&&!needsGameCount)return;
 
-if(updateError)throw updateError;
+const {data:p,error:readError}=await client.from("profiles")
+.select("id,username,avatar_url,level,xp,points,games_played,best_score")
+.eq("id",user.id).maybeSingle();
+if(readError)throw readError;
+
+const meta=user.user_metadata||{};
+const old=p||{
+id:user.id,
+username:meta.full_name||meta.name||user.email?.split("@")[0]||"Player",
+avatar_url:meta.avatar_url||meta.picture||null,
+level:1,xp:0,points:0,games_played:0,best_score:0
+};
+
+const newXP=Number(old.xp||0)+delta;
+const updates={
+id:user.id,
+username:old.username||meta.full_name||meta.name||user.email?.split("@")[0]||"Player",
+avatar_url:old.avatar_url||meta.avatar_url||meta.picture||null,
+xp:newXP,
+level:Math.floor(newXP/100)+1,
+points:Number(old.points||0)+delta,
+games_played:Number(old.games_played||0)+(needsGameCount?1:0),
+best_score:Math.max(Number(old.best_score||0),Number(score||0))
+};
+
+const {error:writeError}=await client.from("profiles")
+.upsert(updates,{onConflict:"id"});
+if(writeError)throw writeError;
+
+savedRunScore=runScore;
+if(needsGameCount)runCounted=true;
+console.info("MindGames stats saved.",updates);
 }catch(e){
-console.error("Could not save game score:",e.message||e);
+console.error("Could not save game stats. Check login, profiles table and Supabase permissions:",e.message||e);
 }
 }
 
 $("start").addEventListener("click",begin);
+
 $("clear").addEventListener("click",()=>{
 if(phase!=="pick")return;
 picked.clear();
@@ -225,7 +250,7 @@ $("state").textContent="Select the tiles";
 $("next").addEventListener("click",()=>{
 $("modal").classList.remove("show");
 if($("modalTitle").textContent==="Round over"){
-round=1;score=0;runScore=0;
+round=1;score=0;runScore=0;savedRunScore=0;runCounted=false;
 $("round").textContent=1;
 $("score").textContent=0;
 }
@@ -234,7 +259,8 @@ begin();
 });
 
 $("restart").addEventListener("click",()=>{
-cancel();round=1;score=0;runScore=0;
+cancel();
+round=1;score=0;runScore=0;savedRunScore=0;runCounted=false;
 $("round").textContent=1;
 $("score").textContent=0;
 $("count").textContent=3;
